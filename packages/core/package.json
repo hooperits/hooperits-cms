@@ -1,0 +1,53 @@
+{
+  "name": "@hooperits/cms",
+  "version": "1.0.0",
+  "description": "HOOPERITS CMS Core - Schema definitions and services",
+  "license": "AGPL-3.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.0",
+    "bcrypt": "^5.1.1",
+    "lru-cache": "^10.4.0",
+    "sharp": "^0.33.5",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.57.0",
+    "prisma": "^5.19.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0",
+    "@vitest/coverage-v8": "^2.0.0"
+  },
+  "peerDependencies": {
+    "next": ">=14.0.0"
+  }
+}
