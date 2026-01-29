@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { handleListMedia, handleUploadMedia } from '@hooperits/cms';
+import { handleListMedia, handleUploadMedia, validateFileType, isAllowedMimeType } from '@hooperits/cms';
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -49,7 +49,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if declared MIME type is allowed
+    if (!isAllowedMimeType(file.type)) {
+      return NextResponse.json(
+        { error: { code: 'BAD_REQUEST', message: 'File type not allowed' } },
+        { status: 400 }
+      );
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Validate actual file content matches declared MIME type
+    const validatedMimeType = validateFileType(buffer, file.type);
+    if (!validatedMimeType) {
+      return NextResponse.json(
+        { error: { code: 'BAD_REQUEST', message: 'File content does not match declared type' } },
+        { status: 400 }
+      );
+    }
 
     const result = await handleUploadMedia({
       user: session.user,
@@ -57,13 +74,14 @@ export async function POST(request: NextRequest) {
       query: {},
       file: {
         filename: file.name,
-        mimeType: file.type,
+        mimeType: validatedMimeType,
         buffer,
       },
     });
 
     return NextResponse.json(result.data ?? result.error, { status: result.status });
-  } catch {
+  } catch (error) {
+    console.error('Media upload error:', error);
     return NextResponse.json(
       { error: { code: 'INTERNAL_ERROR', message: 'Failed to process upload' } },
       { status: 500 }

@@ -41,6 +41,7 @@ export function DynamicForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateField = (name: string, value: unknown) => {
     setData((prev) => ({ ...prev, [name]: value }));
@@ -94,11 +95,16 @@ export function DynamicForm({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
     if (!contentId) return;
-    if (!confirm('Are you sure you want to delete this content?')) return;
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!contentId) return;
 
     setLoading(true);
+    setShowDeleteConfirm(false);
     try {
       const response = await fetch(`/api/cms/content/${contentTypeName}/${contentId}`, {
         method: 'DELETE',
@@ -271,12 +277,50 @@ export function DynamicForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {saveError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {saveError}
+    <>
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-content-title"
+        >
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+            <h2 id="delete-content-title" className="text-lg font-semibold mb-2">
+              Delete content?
+            </h2>
+            <p className="text-gray-600 mb-4">
+              This action cannot be undone. This content will be permanently deleted.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                disabled={loading}
+              >
+                {loading ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {saveError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded" role="alert">
+            {saveError}
+          </div>
+        )}
 
       {/* Schema Fields */}
       {Object.entries(schema).map(([name, field]) => (
@@ -333,9 +377,9 @@ export function DynamicForm({
           {contentId && (
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               disabled={loading}
-              className="px-4 py-2 text-red-600 hover:text-red-800 disabled:opacity-50"
+              className="px-4 py-2 text-red-600 hover:text-red-800 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
             >
               Delete
             </button>
@@ -346,19 +390,20 @@ export function DynamicForm({
             type="button"
             onClick={() => router.back()}
             disabled={loading}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {loading ? 'Saving...' : contentId ? 'Update' : 'Create'}
           </button>
         </div>
       </div>
-    </form>
+      </form>
+    </>
   );
 }
