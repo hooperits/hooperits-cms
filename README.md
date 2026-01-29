@@ -139,9 +139,11 @@ This is a proprietary project of HOOPER IT SERVICES. To contribute, contact the 
 
 ## License
 
-Proprietary - HOOPER IT SERVICES
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-All rights reserved. This software may not be copied, modified, or distributed without express authorization.
+See [LICENSE](LICENSE) for the full license text.
+
+Copyright (c) 2026 HOOPER IT SERVICES
 
 ---
 
@@ -285,9 +287,11 @@ Este es un proyecto propietario de HOOPER IT SERVICES. Para contribuir, contacta
 
 ## Licencia
 
-Propietario - HOOPER IT SERVICES
+Este proyecto está licenciado bajo la **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
-Todos los derechos reservados. Este software no puede ser copiado, modificado, o distribuido sin autorización expresa.
+Ver [LICENSE](LICENSE) para el texto completo de la licencia.
+
+Copyright (c) 2026 HOOPER IT SERVICES
 
 ---
 

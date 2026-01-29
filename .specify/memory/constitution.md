@@ -91,7 +91,7 @@ Toda autoría y créditos del proyecto DEBEN atribuirse exclusivamente a HOOPERI
 - README, documentación y GitHub DEBEN mencionar únicamente a "HOOPERITS" o "HOOPER IT SERVICES"
 - NO DEBE mencionarse a terceros (herramientas de IA, frameworks de desarrollo asistido, etc.) como co-autores
 - Commits, PRs y reviews automatizados DEBEN usar "HOOPERITS Engineering" como firma
-- La licencia y copyright pertenecen exclusivamente a HOOPER IT SERVICES
+- La licencia es AGPL-3.0 y el copyright pertenece a HOOPER IT SERVICES
 
 **Rationale**: El producto es propiedad intelectual de HOOPERITS. Las herramientas utilizadas en el desarrollo son medios, no co-autores.
 
