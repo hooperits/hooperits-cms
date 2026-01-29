@@ -1,0 +1,107 @@
+// HOOPERITS CMS - Database Schema
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// =============================================================================
+// MODELS
+// =============================================================================
+
+/// User model for admin panel authentication and authorization
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdContent Content[] @relation("CreatedBy")
+  updatedContent Content[] @relation("UpdatedBy")
+  uploadedMedia  Media[]
+
+  @@map("users")
+}
+
+/// ContentType defines the schema for a type of content
+model ContentType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  label       String
+  labelPlural String
+  schema      Json
+  icon        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  contents Content[]
+
+  @@map("content_types")
+}
+
+/// Content stores instances of content items
+model Content {
+  id        String        @id @default(uuid())
+  typeId    String
+  type      ContentType   @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  data      Json
+  status    ContentStatus @default(DRAFT)
+  slug      String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Audit fields
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedById String
+  updatedBy   User   @relation("UpdatedBy", fields: [updatedById], references: [id])
+
+  // Indexes for common queries
+  @@unique([typeId, slug])
+  @@index([typeId, status])
+  @@index([typeId, createdAt])
+  @@map("contents")
+}
+
+/// Media stores uploaded files and their variants
+model Media {
+  id           String   @id @default(uuid())
+  filename     String
+  mimeType     String
+  size         Int
+  path         String
+  width        Int?
+  height       Int?
+  variants     Json?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+
+  @@map("media")
+}
