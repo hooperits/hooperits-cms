@@ -123,57 +123,55 @@ const product = await cms.content.getById('product', 'abc123');
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 001 | [CMS Core](specs/001-cms-core/spec.md) | CRUD, media, auth, schemas, REST API, CLI | 🔲 Planned |
-| 002 | [Query Language](specs/002-query-language/spec.md) | HQL (HOOPERITS Query Language) inspired by GROQ | 🔲 Planned |
-| 003 | [Document States](specs/003-document-states/spec.md) | Draft/published states with preview & scheduling | 🔲 Planned |
-| 004 | [Document Versioning](specs/004-document-versioning/spec.md) | Full history with diff, rollback & retention | 🔲 Planned |
-| 005 | [Rich Text](specs/005-rich-text-portable/spec.md) | Portable Text format for structured rich content | 🔲 Planned |
-| 006 | [Real-time Sync](specs/006-real-time-sync/spec.md) | WebSocket sync for real-time updates | 🔲 Planned |
+| 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | 🔲 Planned |
+| 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | 🔲 Planned |
+| 003 | Document States | Draft/published states with preview & scheduling | 🔲 Planned |
+| 004 | Document Versioning | Full history with diff, rollback & retention | 🔲 Planned |
+| 005 | Rich Text | Portable Text format for structured rich content | 🔲 Planned |
+| 006 | Real-time Sync | WebSocket sync for real-time updates | 🔲 Planned |
 
 #### Phase B: Admin UI Enhancement
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 007 | [Advanced Schema Features](specs/007-advanced-schema-features/spec.md) | Conditional fields, cross-validation, groups/tabs | 🔲 Planned |
-| 008 | [Advanced Media Library](specs/008-media-library-advanced/spec.md) | Folders, tags, search, image editing, focal point | 🔲 Planned |
-| 009 | [Collaboration Features](specs/009-collaboration-features/spec.md) | Comments, tasks, mentions, activity feeds | 🔲 Planned |
-| 010 | [Real-time Collaboration](specs/010-real-time-collaboration/spec.md) | Simultaneous editing with presence & conflict resolution | 🔲 Planned |
-| 011 | [Content Releases](specs/011-content-releases/spec.md) | Bundled changes for atomic scheduled publishing | 🔲 Planned |
+| 007 | Advanced Schema Features | Conditional fields, cross-validation, groups/tabs | 🔲 Planned |
+| 008 | Advanced Media Library | Folders, tags, search, image editing, focal point | 🔲 Planned |
+| 009 | Collaboration Features | Comments, tasks, mentions, activity feeds | 🔲 Planned |
+| 010 | Real-time Collaboration | Simultaneous editing with presence & conflict resolution | 🔲 Planned |
+| 011 | Content Releases | Bundled changes for atomic scheduled publishing | 🔲 Planned |
 
 #### Phase C: Advanced Features
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 012 | [Internationalization](specs/012-internationalization/spec.md) | Multi-language support at document and field level | 🔲 Planned |
-| 013 | [Webhooks & Events](specs/013-webhooks-events/spec.md) | Webhook system for external integrations | 🔲 Planned |
-| 014 | [Search & Indexing](specs/014-search-indexing/spec.md) | Full-text search with PostgreSQL, facets & highlights | 🔲 Planned |
-| 015 | [AI Assist](specs/015-ai-assist/spec.md) | Configurable AI assistance (OpenAI, local LLM) | 🔲 Planned |
-| 016 | [Workflows & Approvals](specs/016-workflows-approvals/spec.md) | Configurable approval flows with states and roles | 🔲 Planned |
+| 012 | Internationalization | Multi-language support at document and field level | 🔲 Planned |
+| 013 | Webhooks & Events | Webhook system for external integrations | 🔲 Planned |
+| 014 | Search & Indexing | Full-text search with PostgreSQL, facets & highlights | 🔲 Planned |
+| 015 | AI Assist | Configurable AI assistance (OpenAI, local LLM) | 🔲 Planned |
+| 016 | Workflows & Approvals | Configurable approval flows with states and roles | 🔲 Planned |
 
 #### Phase D: Developer Experience
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 017 | [Plugin System](specs/017-plugin-system/spec.md) | Extensible architecture for inputs, tools & widgets | 🔲 Planned |
-| 018 | [Studio Customization](specs/018-studio-customization/spec.md) | Themes, branding, navigation & custom layouts | 🔲 Planned |
-| 019 | [GraphQL API](specs/019-graphql-api/spec.md) | Auto-generated GraphQL API as REST/HQL alternative | 🔲 Planned |
-| 020 | [CLI Enhancements](specs/020-cli-enhancements/spec.md) | Query, export, import, backup, doctor commands | 🔲 Planned |
-| 021 | [SDK Enhancements](specs/021-sdk-enhancements/spec.md) | Cache, React hooks, optimistic updates, offline support | 🔲 Planned |
+| 017 | Plugin System | Extensible architecture for inputs, tools & widgets | 🔲 Planned |
+| 018 | Studio Customization | Themes, branding, navigation & custom layouts | 🔲 Planned |
+| 019 | GraphQL API | Auto-generated GraphQL API as REST/HQL alternative | 🔲 Planned |
+| 020 | CLI Enhancements | Query, export, import, backup, doctor commands | 🔲 Planned |
+| 021 | SDK Enhancements | Cache, React hooks, optimistic updates, offline support | 🔲 Planned |
 
 #### Phase E: Enterprise Features
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 022 | [Multi-tenancy](specs/022-multi-tenancy/spec.md) | Multiple isolated datasets in one installation | 🔲 Planned |
-| 023 | [Advanced Permissions](specs/023-advanced-permissions/spec.md) | ABAC, document/field permissions, custom roles | 🔲 Planned |
-| 024 | [Analytics Dashboard](specs/024-analytics-dashboard/spec.md) | Content metrics, editor activity, API usage | 🔲 Planned |
-| 025 | [Audit Logging](specs/025-audit-logging/spec.md) | Complete logging for compliance (HIPAA, SOC2) | 🔲 Planned |
-| 026 | [Performance & Caching](specs/026-performance-caching/spec.md) | Advanced caching with tags, invalidation & CDN helpers | 🔲 Planned |
-| 027 | [Backup & Restore](specs/027-backup-restore/spec.md) | Automated backups, point-in-time recovery, DR | 🔲 Planned |
+| 022 | Multi-tenancy | Multiple isolated datasets in one installation | 🔲 Planned |
+| 023 | Advanced Permissions | ABAC, document/field permissions, custom roles | 🔲 Planned |
+| 024 | Analytics Dashboard | Content metrics, editor activity, API usage | 🔲 Planned |
+| 025 | Audit Logging | Complete logging for compliance (HIPAA, SOC2) | 🔲 Planned |
+| 026 | Performance & Caching | Advanced caching with tags, invalidation & CDN helpers | 🔲 Planned |
+| 027 | Backup & Restore | Automated backups, point-in-time recovery, DR | 🔲 Planned |
 
 **Legend**: ✅ Implemented | 🚧 In Progress | 🔲 Planned
-
-See [specs/](specs/) for detailed feature specifications.
 
 ## Documentation
 
@@ -336,57 +334,55 @@ const product = await cms.content.getById('product', 'abc123');
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 001 | [CMS Core](specs/001-cms-core/spec.md) | CRUD, media, auth, schemas, REST API, CLI | 🔲 Planificado |
-| 002 | [Query Language](specs/002-query-language/spec.md) | HQL (HOOPERITS Query Language) inspirado en GROQ | 🔲 Planificado |
-| 003 | [Document States](specs/003-document-states/spec.md) | Estados draft/published con preview y programación | 🔲 Planificado |
-| 004 | [Document Versioning](specs/004-document-versioning/spec.md) | Historial completo con diff, rollback y retención | 🔲 Planificado |
-| 005 | [Rich Text](specs/005-rich-text-portable/spec.md) | Formato Portable Text para contenido estructurado | 🔲 Planificado |
-| 006 | [Real-time Sync](specs/006-real-time-sync/spec.md) | Sincronización WebSocket en tiempo real | 🔲 Planificado |
+| 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | 🔲 Planificado |
+| 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | 🔲 Planificado |
+| 003 | Document States | Estados draft/published con preview y programación | 🔲 Planificado |
+| 004 | Document Versioning | Historial completo con diff, rollback y retención | 🔲 Planificado |
+| 005 | Rich Text | Formato Portable Text para contenido estructurado | 🔲 Planificado |
+| 006 | Real-time Sync | Sincronización WebSocket en tiempo real | 🔲 Planificado |
 
 #### Fase B: Mejoras de Admin UI
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 007 | [Advanced Schema Features](specs/007-advanced-schema-features/spec.md) | Campos condicionales, validación cruzada, grupos/tabs | 🔲 Planificado |
-| 008 | [Advanced Media Library](specs/008-media-library-advanced/spec.md) | Carpetas, tags, búsqueda, edición de imágenes, focal point | 🔲 Planificado |
-| 009 | [Collaboration Features](specs/009-collaboration-features/spec.md) | Comentarios, tareas, menciones, activity feeds | 🔲 Planificado |
-| 010 | [Real-time Collaboration](specs/010-real-time-collaboration/spec.md) | Edición simultánea con presencia y resolución de conflictos | 🔲 Planificado |
-| 011 | [Content Releases](specs/011-content-releases/spec.md) | Bundles de cambios para publicación atómica programada | 🔲 Planificado |
+| 007 | Advanced Schema Features | Campos condicionales, validación cruzada, grupos/tabs | 🔲 Planificado |
+| 008 | Advanced Media Library | Carpetas, tags, búsqueda, edición de imágenes, focal point | 🔲 Planificado |
+| 009 | Collaboration Features | Comentarios, tareas, menciones, activity feeds | 🔲 Planificado |
+| 010 | Real-time Collaboration | Edición simultánea con presencia y resolución de conflictos | 🔲 Planificado |
+| 011 | Content Releases | Bundles de cambios para publicación atómica programada | 🔲 Planificado |
 
 #### Fase C: Features Avanzados
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 012 | [Internationalization](specs/012-internationalization/spec.md) | Soporte multi-idioma a nivel documento y campo | 🔲 Planificado |
-| 013 | [Webhooks & Events](specs/013-webhooks-events/spec.md) | Sistema de webhooks para integraciones externas | 🔲 Planificado |
-| 014 | [Search & Indexing](specs/014-search-indexing/spec.md) | Búsqueda full-text con PostgreSQL, facetas y highlights | 🔲 Planificado |
-| 015 | [AI Assist](specs/015-ai-assist/spec.md) | Asistencia IA configurable (OpenAI, LLM local) | 🔲 Planificado |
-| 016 | [Workflows & Approvals](specs/016-workflows-approvals/spec.md) | Flujos de aprobación configurables con estados y roles | 🔲 Planificado |
+| 012 | Internationalization | Soporte multi-idioma a nivel documento y campo | 🔲 Planificado |
+| 013 | Webhooks & Events | Sistema de webhooks para integraciones externas | 🔲 Planificado |
+| 014 | Search & Indexing | Búsqueda full-text con PostgreSQL, facetas y highlights | 🔲 Planificado |
+| 015 | AI Assist | Asistencia IA configurable (OpenAI, LLM local) | 🔲 Planificado |
+| 016 | Workflows & Approvals | Flujos de aprobación configurables con estados y roles | 🔲 Planificado |
 
 #### Fase D: Experiencia de Desarrollador
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 017 | [Plugin System](specs/017-plugin-system/spec.md) | Arquitectura extensible para inputs, tools y widgets | 🔲 Planificado |
-| 018 | [Studio Customization](specs/018-studio-customization/spec.md) | Temas, branding, navegación y layouts personalizables | 🔲 Planificado |
-| 019 | [GraphQL API](specs/019-graphql-api/spec.md) | API GraphQL auto-generada como alternativa a REST/HQL | 🔲 Planificado |
-| 020 | [CLI Enhancements](specs/020-cli-enhancements/spec.md) | Comandos: query, export, import, backup, doctor | 🔲 Planificado |
-| 021 | [SDK Enhancements](specs/021-sdk-enhancements/spec.md) | Caché, React hooks, optimistic updates, soporte offline | 🔲 Planificado |
+| 017 | Plugin System | Arquitectura extensible para inputs, tools y widgets | 🔲 Planificado |
+| 018 | Studio Customization | Temas, branding, navegación y layouts personalizables | 🔲 Planificado |
+| 019 | GraphQL API | API GraphQL auto-generada como alternativa a REST/HQL | 🔲 Planificado |
+| 020 | CLI Enhancements | Comandos: query, export, import, backup, doctor | 🔲 Planificado |
+| 021 | SDK Enhancements | Caché, React hooks, optimistic updates, soporte offline | 🔲 Planificado |
 
 #### Fase E: Features Enterprise
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 022 | [Multi-tenancy](specs/022-multi-tenancy/spec.md) | Múltiples datasets aislados en una instalación | 🔲 Planificado |
-| 023 | [Advanced Permissions](specs/023-advanced-permissions/spec.md) | ABAC, permisos por documento/campo, roles custom | 🔲 Planificado |
-| 024 | [Analytics Dashboard](specs/024-analytics-dashboard/spec.md) | Métricas de contenido, actividad de editores, uso de API | 🔲 Planificado |
-| 025 | [Audit Logging](specs/025-audit-logging/spec.md) | Logging completo para compliance (HIPAA, SOC2) | 🔲 Planificado |
-| 026 | [Performance & Caching](specs/026-performance-caching/spec.md) | Caché avanzado con tags, invalidación y CDN helpers | 🔲 Planificado |
-| 027 | [Backup & Restore](specs/027-backup-restore/spec.md) | Backups automáticos, point-in-time recovery, DR | 🔲 Planificado |
+| 022 | Multi-tenancy | Múltiples datasets aislados en una instalación | 🔲 Planificado |
+| 023 | Advanced Permissions | ABAC, permisos por documento/campo, roles custom | 🔲 Planificado |
+| 024 | Analytics Dashboard | Métricas de contenido, actividad de editores, uso de API | 🔲 Planificado |
+| 025 | Audit Logging | Logging completo para compliance (HIPAA, SOC2) | 🔲 Planificado |
+| 026 | Performance & Caching | Caché avanzado con tags, invalidación y CDN helpers | 🔲 Planificado |
+| 027 | Backup & Restore | Backups automáticos, point-in-time recovery, DR | 🔲 Planificado |
 
 **Leyenda**: ✅ Implementado | 🚧 En Progreso | 🔲 Planificado
-
-Ver [specs/](specs/) para especificaciones detalladas de cada feature.
 
 ## Documentación
 
