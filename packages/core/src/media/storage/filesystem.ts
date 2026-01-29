@@ -9,14 +9,24 @@ import type { StorageAdapter } from './types';
 export class FilesystemStorage implements StorageAdapter {
   private basePath: string;
   private baseUrl: string;
+  private resolvedBasePath: string;
 
   constructor(basePath: string, baseUrl: string = '/uploads') {
     this.basePath = basePath;
     this.baseUrl = baseUrl;
+    this.resolvedBasePath = path.resolve(basePath);
+  }
+
+  private validatePath(filePath: string): string {
+    const fullPath = path.resolve(this.basePath, filePath);
+    if (!fullPath.startsWith(this.resolvedBasePath)) {
+      throw new Error('Invalid file path: path traversal detected');
+    }
+    return fullPath;
   }
 
   async upload(file: Buffer, filePath: string): Promise<string> {
-    const fullPath = path.join(this.basePath, filePath);
+    const fullPath = this.validatePath(filePath);
     const dir = path.dirname(fullPath);
 
     // Ensure directory exists
@@ -29,7 +39,7 @@ export class FilesystemStorage implements StorageAdapter {
   }
 
   async delete(filePath: string): Promise<void> {
-    const fullPath = path.join(this.basePath, filePath);
+    const fullPath = this.validatePath(filePath);
 
     try {
       await fs.unlink(fullPath);
@@ -46,7 +56,7 @@ export class FilesystemStorage implements StorageAdapter {
   }
 
   async exists(filePath: string): Promise<boolean> {
-    const fullPath = path.join(this.basePath, filePath);
+    const fullPath = this.validatePath(filePath);
 
     try {
       await fs.access(fullPath);
