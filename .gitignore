@@ -46,3 +46,4 @@ prisma/*.db-journal
 .claude/
 .specify/
 specs/
+CLAUDE.md
