@@ -132,4 +132,17 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
+10. **README Synchronization** (Constitution Principle VII - Living Documentation):
+    - Read the current README.md at repository root
+    - **BILINGUAL REQUIREMENT**: The README has two sections (English first, then Spanish after "---")
+    - Update the following sections IN BOTH LANGUAGES based on the completed spec:
+      - **Features**: Add/update features that were implemented
+      - **Roadmap**: Move completed items to "Done", update status of in-progress items
+      - **Quick Start**: Update if installation or usage steps changed
+      - **API/Examples**: Add new code examples if applicable
+    - Preserve existing structure and formatting
+    - Do NOT remove existing content unless it's outdated or incorrect
+    - **IMPORTANT**: Every change MUST be applied to both English AND Spanish sections
+    - Commit README changes as part of the implementation
+
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.

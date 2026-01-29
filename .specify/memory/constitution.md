@@ -2,23 +2,21 @@
 =============================================================================
 SYNC IMPACT REPORT
 =============================================================================
-Version Change: 1.0.0 → 1.1.0 (MINOR)
-Bump Rationale: New principle added (VI. Attribution & Branding)
+Version Change: 1.2.0 → 1.2.1 (PATCH)
+Bump Rationale: Expanded Principle VII with bilingual requirement
 
-Modified Principles: None
-Added Sections:
-  - VI. Attribution & Branding (new principle)
+Modified Principles:
+  - VII. Living Documentation → Added bilingual (EN/ES) requirement
 
+Added Sections: None
 Removed Sections: None
 
 Templates/Files Status:
   ✅ .specify/templates/plan-template.md - No changes needed
   ✅ .specify/templates/spec-template.md - No changes needed
   ✅ .specify/templates/tasks-template.md - No changes needed
-  ✅ README.md - Already compliant (credits HOOPERITS only)
-  ✅ .claude/commands/code-review.md - Updated (HOOPERITS Engineering)
-  ✅ .claude/commands/security-review.md - Updated (HOOPERITS Engineering)
-  ✅ .claude/commands/design-review.md - Updated (HOOPERITS Engineering)
+  ✅ .claude/commands/speckit.implement.md - Updated (bilingual README sync)
+  ✅ README.md - Updated with bilingual structure (EN/ES)
 
 Follow-up TODOs: None
 =============================================================================
@@ -97,6 +95,19 @@ Toda autoría y créditos del proyecto DEBEN atribuirse exclusivamente a HOOPERI
 
 **Rationale**: El producto es propiedad intelectual de HOOPERITS. Las herramientas utilizadas en el desarrollo son medios, no co-autores.
 
+### VII. Living Documentation
+
+El README.md DEBE mantenerse actualizado y seguir las mejores prácticas de documentación GitHub:
+
+- **Estructura requerida**: Título, badges, descripción, características, instalación, uso, API/ejemplos, stack, roadmap, licencia
+- **Bilingüe obligatorio**: El README DEBE estar en inglés Y español. Estructura: English section primero, luego "---" separador, luego sección en Español
+- **Sincronización obligatoria**: Al completar cualquier spec de speckit (`/speckit.implement`), el README DEBE actualizarse en AMBOS idiomas
+- **Sección Features**: DEBE reflejar las características realmente implementadas (no futuras)
+- **Sección Roadmap**: DEBE listar features planificadas con estado (Planned/In Progress/Done)
+- **Badges**: DEBE incluir badges de build status, version, y license cuando aplique
+
+**Rationale**: El README es la primera impresión del proyecto. Documentación bilingüe amplía el alcance a mercados hispanohablantes y angloparlantes.
+
 ## Technology Constraints
 
 | Capa | Tecnología | No Usar |
@@ -130,4 +141,4 @@ Esta constitución aplica a todo el desarrollo del CMS.
 3. Documentar migración si hay breaking changes
 4. Incrementar versión según semver
 
-**Version**: 1.1.0 | **Ratified**: 2026-01-29 | **Last Amended**: 2026-01-29
+**Version**: 1.2.1 | **Ratified**: 2026-01-29 | **Last Amended**: 2026-01-29
