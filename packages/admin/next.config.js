@@ -2,12 +2,12 @@
 const nextConfig = {
   transpilePackages: ['@hooperits/cms'],
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    remotePatterns: process.env.ALLOWED_IMAGE_DOMAINS
+      ? process.env.ALLOWED_IMAGE_DOMAINS.split(',').map((domain) => ({
+          protocol: 'https',
+          hostname: domain.trim(),
+        }))
+      : [],
     unoptimized: process.env.NODE_ENV === 'development',
   },
 };
