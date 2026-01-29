@@ -233,7 +233,7 @@ export async function deleteMedia(id: string): Promise<void> {
 
   // Delete variants
   if (media.variants) {
-    const variants = media.variants as Record<string, MediaVariant>;
+    const variants = media.variants as unknown as Record<string, MediaVariant>;
     for (const variant of Object.values(variants)) {
       await storage.delete(variant.path);
     }

@@ -3,6 +3,7 @@
  * Synchronize schema definitions with database ContentType records
  */
 
+import { Prisma } from '@prisma/client';
 import { db } from '../db';
 import { logger } from '../logger';
 import type { SchemaDefinition } from './types';
@@ -43,7 +44,7 @@ export async function syncSchemas(schemas?: SchemaDefinition[]): Promise<SyncRes
           name: schema.name,
           label: schema.label,
           labelPlural: schema.labelPlural,
-          schema: { fields: schema.fields },
+          schema: { fields: schema.fields } as unknown as Prisma.InputJsonValue,
           icon: schema.icon ?? null,
         },
       });
@@ -63,7 +64,7 @@ export async function syncSchemas(schemas?: SchemaDefinition[]): Promise<SyncRes
           data: {
             label: schema.label,
             labelPlural: schema.labelPlural,
-            schema: { fields: schema.fields },
+            schema: { fields: schema.fields } as unknown as Prisma.InputJsonValue,
             icon: schema.icon ?? null,
           },
         });

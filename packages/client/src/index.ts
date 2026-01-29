@@ -6,6 +6,9 @@
 // Client
 export { CMSClient, createCMSClient } from './client';
 
+// HQL Client (standalone)
+export { HQLClient, createHQLClient, defineQuery } from './hql';
+
 // Types
 export type {
   Content,
@@ -18,6 +21,12 @@ export type {
   ListOptions,
   ClientConfig,
   CMSError,
+  // HQL Types
+  HQLQueryOptions,
+  HQLQueryResponse,
+  HQLQueryMeta,
+  HQLError,
+  HQLErrorCode,
 } from './types';
 
 // React hooks (optional)

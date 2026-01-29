@@ -11,6 +11,8 @@ import type {
   ListOptions,
   ClientConfig,
   CMSError,
+  HQLQueryOptions,
+  HQLQueryResponse,
 } from './types';
 
 export class CMSClient {
@@ -124,6 +126,54 @@ export class CMSClient {
       return this.request<ContentType>(`/schema/${name}`);
     },
   };
+
+  /**
+   * HQL Query API
+   */
+
+  /**
+   * Execute an HQL query with full response including metadata
+   * @param queryString The HQL query string
+   * @param params Optional parameters to substitute in the query
+   * @param options Optional query execution options
+   */
+  async query<T = unknown>(
+    queryString: string,
+    params?: Record<string, unknown>,
+    options?: HQLQueryOptions
+  ): Promise<HQLQueryResponse<T>> {
+    const body: { query: string; params?: Record<string, unknown>; options?: HQLQueryOptions } = {
+      query: queryString,
+    };
+
+    if (params) {
+      body.params = params;
+    }
+
+    if (options) {
+      body.options = options;
+    }
+
+    return this.request<HQLQueryResponse<T>>('/hql', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  /**
+   * Execute an HQL query and return only the data (without metadata)
+   * @param queryString The HQL query string
+   * @param params Optional parameters to substitute in the query
+   * @param options Optional query execution options
+   */
+  async fetch<T = unknown>(
+    queryString: string,
+    params?: Record<string, unknown>,
+    options?: HQLQueryOptions
+  ): Promise<T> {
+    const result = await this.query<T>(queryString, params, options);
+    return result.data;
+  }
 }
 
 /**

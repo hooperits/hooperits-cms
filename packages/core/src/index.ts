@@ -81,3 +81,9 @@ export {
   handleDeleteMedia,
 } from './api/media';
 export type { MediaRequestContext, MediaApiResponse } from './api/media';
+
+// API handlers - HQL
+export { handleHQLQuery } from './api/hql';
+
+// HQL module (HOOPERITS Query Language)
+export * from './hql';
