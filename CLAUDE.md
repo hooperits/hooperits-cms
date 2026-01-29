@@ -22,6 +22,15 @@ npm test && npm run lint
 
 TypeScript 5.x / Node.js 18+: Follow standard conventions
 
+## Git & PR Guidelines
+
+**IMPORTANTE - Attribution Policy:**
+- Los commits NO deben incluir "Co-Authored-By" de herramientas de IA
+- Los Pull Requests NO deben incluir badges ni menciones a herramientas de IA
+- NO usar frases como "Generated with Claude Code", "Built with AI", etc.
+- Toda autoría se atribuye exclusivamente a HOOPERITS Engineering
+- Ver CONSTITUTION.md sección VI para detalles completos
+
 ## Recent Changes
 
 - 001-cms-core: Added TypeScript 5.x / Node.js 18+ + Next.js 14, Prisma, NextAuth.js, Zod, Sharp
