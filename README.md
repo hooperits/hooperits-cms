@@ -31,6 +31,7 @@ HOOPERITS CMS is a headless content management system designed for developers wh
 | Schema-driven | ✅ Implemented | Define content types in TypeScript |
 | Auto-generated Admin UI | ✅ Implemented | Panel generated from schemas |
 | Type-safe SDK | ✅ Implemented | Client with TypeScript types |
+| HQL Query Language | ✅ Implemented | GROQ-inspired query language for flexible content retrieval |
 | Image optimization | ✅ Implemented | Automatic image optimization with Sharp |
 | RBAC Authentication | ✅ Implemented | Role-based access control (Admin/Editor/Viewer) |
 | CLI Tools | ✅ Implemented | Init, migrate, generate, create-admin commands |
@@ -105,6 +106,38 @@ const products = await cms.content.getAll('product');
 const product = await cms.content.getById('product', 'abc123');
 ```
 
+### Query with HQL
+
+HOOPERITS CMS includes HQL (HOOPERITS Query Language), a GROQ-inspired query language for flexible content retrieval:
+
+```typescript
+// Basic query
+const posts = await cms.query('*[_type == "post"]');
+
+// With filtering and projection
+const activeServices = await cms.query(
+  '*[_type == "service" && active == true]{title, slug, price}'
+);
+
+// With ordering and pagination
+const recentPosts = await cms.query(
+  '*[_type == "post"] | order(publishedAt desc)[0..9]'
+);
+
+// With reference resolution
+const postsWithAuthor = await cms.query(
+  '*[_type == "post"]{title, author->{name, avatar}}'
+);
+
+// With parameters (SQL injection safe)
+const categoryPosts = await cms.query(
+  '*[_type == "post" && category._ref == $categoryId]',
+  { categoryId: 'cat_123' }
+);
+```
+
+Available functions: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `coalesce()`, `math::sum()`, `math::avg()`, `array::unique()`, and more.
+
 ## Roadmap
 
 ### Version Milestones
@@ -126,7 +159,7 @@ const product = await cms.content.getById('product', 'abc123');
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
 | 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implemented |
-| 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | 🔲 Planned |
+| 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | ✅ Implemented |
 | 003 | Document States | Draft/published states with preview & scheduling | 🔲 Planned |
 | 004 | Document Versioning | Full history with diff, rollback & retention | 🔲 Planned |
 | 005 | Rich Text | Portable Text format for structured rich content | 🔲 Planned |
@@ -192,6 +225,7 @@ hooperits-cms/
 │   │       ├── auth/             # Authentication and permissions
 │   │       ├── content/          # Content CRUD operations
 │   │       ├── media/            # Media handling and optimization
+│   │       ├── hql/              # HQL query language (parser, executor)
 │   │       └── api/              # HTTP handlers
 │   ├── admin/                     # @hooperits/admin - Admin UI
 │   │   └── src/
@@ -253,6 +287,7 @@ HOOPERITS CMS es un sistema de gestión de contenido headless diseñado para des
 | Schema-driven | ✅ Implementado | Define tipos de contenido en TypeScript |
 | Admin UI automático | ✅ Implementado | Panel generado desde schemas |
 | Type-safe SDK | ✅ Implementado | Cliente con tipos TypeScript |
+| HQL Query Language | ✅ Implementado | Lenguaje de consulta inspirado en GROQ |
 | Image optimization | ✅ Implementado | Optimización automática con Sharp |
 | Autenticación RBAC | ✅ Implementado | Control de acceso por roles (Admin/Editor/Viewer) |
 | CLI Tools | ✅ Implementado | Comandos init, migrate, generate, create-admin |
@@ -327,6 +362,38 @@ const products = await cms.content.getAll('product');
 const product = await cms.content.getById('product', 'abc123');
 ```
 
+### Consultas con HQL
+
+HOOPERITS CMS incluye HQL (HOOPERITS Query Language), un lenguaje de consulta inspirado en GROQ para obtener contenido de forma flexible:
+
+```typescript
+// Consulta básica
+const posts = await cms.query('*[_type == "post"]');
+
+// Con filtros y proyección
+const activeServices = await cms.query(
+  '*[_type == "service" && active == true]{title, slug, price}'
+);
+
+// Con ordenamiento y paginación
+const recentPosts = await cms.query(
+  '*[_type == "post"] | order(publishedAt desc)[0..9]'
+);
+
+// Con resolución de referencias
+const postsWithAuthor = await cms.query(
+  '*[_type == "post"]{title, author->{name, avatar}}'
+);
+
+// Con parámetros (seguro contra SQL injection)
+const categoryPosts = await cms.query(
+  '*[_type == "post" && category._ref == $categoryId]',
+  { categoryId: 'cat_123' }
+);
+```
+
+Funciones disponibles: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `coalesce()`, `math::sum()`, `math::avg()`, `array::unique()`, y más.
+
 ## Roadmap
 
 ### Versiones Planificadas
@@ -348,7 +415,7 @@ const product = await cms.content.getById('product', 'abc123');
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
 | 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implementado |
-| 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | 🔲 Planificado |
+| 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | ✅ Implementado |
 | 003 | Document States | Estados draft/published con preview y programación | 🔲 Planificado |
 | 004 | Document Versioning | Historial completo con diff, rollback y retención | 🔲 Planificado |
 | 005 | Rich Text | Formato Portable Text para contenido estructurado | 🔲 Planificado |
@@ -414,6 +481,7 @@ hooperits-cms/
 │   │       ├── auth/             # Autenticación y permisos
 │   │       ├── content/          # Operaciones CRUD de contenido
 │   │       ├── media/            # Manejo y optimización de media
+│   │       ├── hql/              # Lenguaje de consulta HQL (parser, executor)
 │   │       └── api/              # HTTP handlers
 │   ├── admin/                     # @hooperits/admin - Admin UI
 │   │   └── src/
