@@ -27,11 +27,13 @@ HOOPERITS CMS is a headless content management system designed for developers wh
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| 100% Self-hosted | ✅ Designed | No external service dependencies |
-| Schema-driven | ✅ Designed | Define content types in TypeScript |
-| Auto-generated Admin UI | 🔲 Planned | Panel generated from schemas |
-| Type-safe SDK | 🔲 Planned | Client with TypeScript types |
-| Image optimization | 🔲 Planned | Automatic image optimization |
+| 100% Self-hosted | ✅ Implemented | No external service dependencies |
+| Schema-driven | ✅ Implemented | Define content types in TypeScript |
+| Auto-generated Admin UI | ✅ Implemented | Panel generated from schemas |
+| Type-safe SDK | ✅ Implemented | Client with TypeScript types |
+| Image optimization | ✅ Implemented | Automatic image optimization with Sharp |
+| RBAC Authentication | ✅ Implemented | Role-based access control (Admin/Editor/Viewer) |
+| CLI Tools | ✅ Implemented | Init, migrate, generate, create-admin commands |
 
 **Legend**: ✅ Implemented | 🚧 In Progress | 🔲 Planned
 
@@ -123,7 +125,7 @@ const product = await cms.content.getById('product', 'abc123');
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | 🔲 Planned |
+| 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implemented |
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | 🔲 Planned |
 | 003 | Document States | Draft/published states with preview & scheduling | 🔲 Planned |
 | 004 | Document Versioning | Full history with diff, rollback & retention | 🔲 Planned |
@@ -183,16 +185,25 @@ const product = await cms.content.getById('product', 'abc123');
 
 ```
 hooperits-cms/
-├── src/                            # Source code
-│   ├── app/                       # Next.js App Router
-│   ├── components/                # React components
-│   ├── lib/                       # Core library
-│   └── cms/                       # CMS schemas
-├── prisma/                         # Database schema and migrations
-├── assets/                         # Images and static assets
-│   └── logo.png                   # Project logo
-├── docs/                           # Documentation
-└── public/                         # Static files
+├── packages/
+│   ├── core/                      # @hooperits/cms - Core library
+│   │   └── src/
+│   │       ├── schema/           # Schema definition and validation
+│   │       ├── auth/             # Authentication and permissions
+│   │       ├── content/          # Content CRUD operations
+│   │       ├── media/            # Media handling and optimization
+│   │       └── api/              # HTTP handlers
+│   ├── admin/                     # @hooperits/admin - Admin UI
+│   │   └── src/
+│   │       ├── app/              # Next.js App Router pages
+│   │       └── components/       # React components
+│   ├── client/                    # @hooperits/client - Frontend SDK
+│   │   └── src/                  # Client and React hooks
+│   └── cli/                       # @hooperits/cli - CLI tools
+│       └── src/commands/         # init, migrate, generate, create-admin
+├── prisma/                        # Database schema
+├── assets/                        # Static assets
+└── docs/                          # Documentation
 ```
 
 ## Contributing
@@ -238,11 +249,13 @@ HOOPERITS CMS es un sistema de gestión de contenido headless diseñado para des
 
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
-| 100% Self-hosted | ✅ Diseñado | Sin dependencias de servicios externos |
-| Schema-driven | ✅ Diseñado | Define tipos de contenido en TypeScript |
-| Admin UI automático | 🔲 Planificado | Panel generado desde schemas |
-| Type-safe SDK | 🔲 Planificado | Cliente con tipos TypeScript |
-| Image optimization | 🔲 Planificado | Optimización automática de imágenes |
+| 100% Self-hosted | ✅ Implementado | Sin dependencias de servicios externos |
+| Schema-driven | ✅ Implementado | Define tipos de contenido en TypeScript |
+| Admin UI automático | ✅ Implementado | Panel generado desde schemas |
+| Type-safe SDK | ✅ Implementado | Cliente con tipos TypeScript |
+| Image optimization | ✅ Implementado | Optimización automática con Sharp |
+| Autenticación RBAC | ✅ Implementado | Control de acceso por roles (Admin/Editor/Viewer) |
+| CLI Tools | ✅ Implementado | Comandos init, migrate, generate, create-admin |
 
 **Leyenda**: ✅ Implementado | 🚧 En Progreso | 🔲 Planificado
 
@@ -334,7 +347,7 @@ const product = await cms.content.getById('product', 'abc123');
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | 🔲 Planificado |
+| 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implementado |
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | 🔲 Planificado |
 | 003 | Document States | Estados draft/published con preview y programación | 🔲 Planificado |
 | 004 | Document Versioning | Historial completo con diff, rollback y retención | 🔲 Planificado |
@@ -394,16 +407,25 @@ const product = await cms.content.getById('product', 'abc123');
 
 ```
 hooperits-cms/
-├── src/                            # Código fuente
-│   ├── app/                       # Next.js App Router
-│   ├── components/                # Componentes React
-│   ├── lib/                       # Librería core
-│   └── cms/                       # Schemas del CMS
-├── prisma/                         # Schema y migraciones de base de datos
-├── assets/                         # Imágenes y assets estáticos
-│   └── logo.png                   # Logo del proyecto
-├── docs/                           # Documentación
-└── public/                         # Archivos estáticos
+├── packages/
+│   ├── core/                      # @hooperits/cms - Librería core
+│   │   └── src/
+│   │       ├── schema/           # Definición y validación de schemas
+│   │       ├── auth/             # Autenticación y permisos
+│   │       ├── content/          # Operaciones CRUD de contenido
+│   │       ├── media/            # Manejo y optimización de media
+│   │       └── api/              # HTTP handlers
+│   ├── admin/                     # @hooperits/admin - Admin UI
+│   │   └── src/
+│   │       ├── app/              # Páginas Next.js App Router
+│   │       └── components/       # Componentes React
+│   ├── client/                    # @hooperits/client - SDK para frontend
+│   │   └── src/                  # Cliente y React hooks
+│   └── cli/                       # @hooperits/cli - CLI tools
+│       └── src/commands/         # init, migrate, generate, create-admin
+├── prisma/                        # Schema de base de datos
+├── assets/                        # Assets estáticos
+└── docs/                          # Documentación
 ```
 
 ## Contribuir
