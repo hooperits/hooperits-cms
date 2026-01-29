@@ -3,6 +3,12 @@
 </p>
 
 <p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue.svg" alt="License: AGPL-3.0" /></a>
+  <img src="https://img.shields.io/badge/version-1.0.0-green.svg" alt="Version: 1.0.0" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg" alt="Node: >=18.0.0" />
+</p>
+
+<p align="center">
   Headless content management system, 100% self-hosted
   <br />
   <a href="docs/quickstart.md"><strong>Documentation »</strong></a>
@@ -256,6 +262,12 @@ Copyright (c) 2026 HOOPER IT SERVICES
 
 <p id="español" align="center">
   <img src="assets/logo.png" alt="HOOPERITS CMS" width="400" />
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-AGPL--3.0-blue.svg" alt="Licencia: AGPL-3.0" /></a>
+  <img src="https://img.shields.io/badge/versión-1.0.0-green.svg" alt="Versión: 1.0.0" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg" alt="Node: >=18.0.0" />
 </p>
 
 <p align="center">
