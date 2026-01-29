@@ -22,7 +22,7 @@
     "create-admin": "tsx src/commands/create-admin.ts"
   },
   "dependencies": {
-    "@hooperits/cms": "workspace:*",
+    "@hooperits/cms": "*",
     "commander": "^12.1.0",
     "chalk": "^5.3.0",
     "ora": "^8.0.0",
