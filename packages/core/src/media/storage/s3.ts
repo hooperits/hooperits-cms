@@ -11,11 +11,16 @@ interface S3Config {
   accessKey: string;
   secretKey: string;
   endpoint?: string;
+  acl?: string;
 }
+
+// Type for lazy-loaded S3Client
+type S3ClientType = InstanceType<typeof import('@aws-sdk/client-s3').S3Client>;
 
 export class S3Storage implements StorageAdapter {
   private config: S3Config;
   private baseUrl: string;
+  private clientPromise: Promise<S3ClientType> | null = null;
 
   constructor(config: S3Config) {
     this.config = config;
@@ -28,27 +33,35 @@ export class S3Storage implements StorageAdapter {
     }
   }
 
-  async upload(file: Buffer, filePath: string): Promise<string> {
-    // Dynamically import AWS SDK to avoid bundling when not used
-    const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+  private async getClient(): Promise<S3ClientType> {
+    if (!this.clientPromise) {
+      this.clientPromise = (async () => {
+        const { S3Client } = await import('@aws-sdk/client-s3');
+        return new S3Client({
+          region: this.config.region,
+          credentials: {
+            accessKeyId: this.config.accessKey,
+            secretAccessKey: this.config.secretKey,
+          },
+          ...(this.config.endpoint && {
+            endpoint: this.config.endpoint,
+            forcePathStyle: true,
+          }),
+        });
+      })();
+    }
+    return this.clientPromise;
+  }
 
-    const client = new S3Client({
-      region: this.config.region,
-      credentials: {
-        accessKeyId: this.config.accessKey,
-        secretAccessKey: this.config.secretKey,
-      },
-      ...(this.config.endpoint && {
-        endpoint: this.config.endpoint,
-        forcePathStyle: true,
-      }),
-    });
+  async upload(file: Buffer, filePath: string): Promise<string> {
+    const { PutObjectCommand } = await import('@aws-sdk/client-s3');
+    const client = await this.getClient();
 
     const command = new PutObjectCommand({
       Bucket: this.config.bucket,
       Key: filePath,
       Body: file,
-      ACL: 'public-read',
+      ...(this.config.acl && { ACL: this.config.acl }),
     });
 
     await client.send(command);
@@ -57,19 +70,8 @@ export class S3Storage implements StorageAdapter {
   }
 
   async delete(filePath: string): Promise<void> {
-    const { S3Client, DeleteObjectCommand } = await import('@aws-sdk/client-s3');
-
-    const client = new S3Client({
-      region: this.config.region,
-      credentials: {
-        accessKeyId: this.config.accessKey,
-        secretAccessKey: this.config.secretKey,
-      },
-      ...(this.config.endpoint && {
-        endpoint: this.config.endpoint,
-        forcePathStyle: true,
-      }),
-    });
+    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    const client = await this.getClient();
 
     const command = new DeleteObjectCommand({
       Bucket: this.config.bucket,
@@ -84,19 +86,8 @@ export class S3Storage implements StorageAdapter {
   }
 
   async exists(filePath: string): Promise<boolean> {
-    const { S3Client, HeadObjectCommand } = await import('@aws-sdk/client-s3');
-
-    const client = new S3Client({
-      region: this.config.region,
-      credentials: {
-        accessKeyId: this.config.accessKey,
-        secretAccessKey: this.config.secretKey,
-      },
-      ...(this.config.endpoint && {
-        endpoint: this.config.endpoint,
-        forcePathStyle: true,
-      }),
-    });
+    const { HeadObjectCommand } = await import('@aws-sdk/client-s3');
+    const client = await this.getClient();
 
     try {
       const command = new HeadObjectCommand({
@@ -118,6 +109,7 @@ export function createS3Storage(): S3Storage {
     accessKey: process.env.S3_ACCESS_KEY!,
     secretKey: process.env.S3_SECRET_KEY!,
     endpoint: process.env.S3_ENDPOINT,
+    acl: process.env.S3_ACL, // Optional: 'public-read', 'private', etc.
   };
 
   if (!config.bucket || !config.region || !config.accessKey || !config.secretKey) {
