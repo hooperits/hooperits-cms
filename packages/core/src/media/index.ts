@@ -22,6 +22,8 @@ export {
   processImageVariant,
   generateImageVariants,
   getVariantConfigs,
+  validateFileType,
+  isAllowedMimeType,
 } from './optimizer';
 
 // Service

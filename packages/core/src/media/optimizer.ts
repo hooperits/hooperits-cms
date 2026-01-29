@@ -47,6 +47,65 @@ export function isImage(mimeType: string): boolean {
 }
 
 /**
+ * Allowed MIME types for uploads
+ */
+const ALLOWED_MIME_TYPES = new Map<string, string[]>([
+  ['image/jpeg', ['\xFF\xD8\xFF']],
+  ['image/png', ['\x89PNG\r\n\x1a\n']],
+  ['image/gif', ['GIF87a', 'GIF89a']],
+  ['image/webp', ['RIFF', 'WEBP']],
+  ['image/svg+xml', ['<svg', '<?xml']],
+  ['application/pdf', ['%PDF']],
+]);
+
+/**
+ * Validate file type using magic bytes (file signature)
+ * Returns the detected MIME type or null if invalid
+ */
+export function validateFileType(buffer: Buffer, declaredMimeType: string): string | null {
+  const header = buffer.subarray(0, 16).toString('binary');
+
+  // Check if declared MIME type is allowed
+  const signatures = ALLOWED_MIME_TYPES.get(declaredMimeType);
+  if (!signatures) {
+    return null;
+  }
+
+  // For SVG, check text content (first bytes might be whitespace)
+  if (declaredMimeType === 'image/svg+xml') {
+    const textContent = buffer.subarray(0, 256).toString('utf8').trim().toLowerCase();
+    if (textContent.startsWith('<svg') || textContent.startsWith('<?xml')) {
+      return declaredMimeType;
+    }
+    return null;
+  }
+
+  // For WebP, need to check RIFF header and WEBP marker
+  if (declaredMimeType === 'image/webp') {
+    if (header.startsWith('RIFF') && buffer.subarray(8, 12).toString('binary') === 'WEBP') {
+      return declaredMimeType;
+    }
+    return null;
+  }
+
+  // Check magic bytes for other types
+  for (const sig of signatures) {
+    if (header.startsWith(sig)) {
+      return declaredMimeType;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Check if MIME type is allowed for upload
+ */
+export function isAllowedMimeType(mimeType: string): boolean {
+  return ALLOWED_MIME_TYPES.has(mimeType);
+}
+
+/**
  * Process an image into a specific variant
  */
 export async function processImageVariant(
