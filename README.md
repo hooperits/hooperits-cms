@@ -185,39 +185,16 @@ See [specs/](specs/) for detailed feature specifications.
 
 ```
 hooperits-cms/
-├── specs/                          # Feature specifications (27 specs)
-│   ├── 001-cms-core/              # Core CMS spec
-│   ├── 002-query-language/        # HQL query language
-│   ├── 003-document-states/       # Draft/published states
-│   ├── 004-document-versioning/   # Version history
-│   ├── 005-rich-text-portable/    # Portable Text format
-│   ├── 006-real-time-sync/        # WebSocket sync
-│   ├── 007-advanced-schema-features/
-│   ├── 008-media-library-advanced/
-│   ├── 009-collaboration-features/
-│   ├── 010-real-time-collaboration/
-│   ├── 011-content-releases/
-│   ├── 012-internationalization/
-│   ├── 013-webhooks-events/
-│   ├── 014-search-indexing/
-│   ├── 015-ai-assist/
-│   ├── 016-workflows-approvals/
-│   ├── 017-plugin-system/
-│   ├── 018-studio-customization/
-│   ├── 019-graphql-api/
-│   ├── 020-cli-enhancements/
-│   ├── 021-sdk-enhancements/
-│   ├── 022-multi-tenancy/
-│   ├── 023-advanced-permissions/
-│   ├── 024-analytics-dashboard/
-│   ├── 025-audit-logging/
-│   ├── 026-performance-caching/
-│   └── 027-backup-restore/
+├── src/                            # Source code
+│   ├── app/                       # Next.js App Router
+│   ├── components/                # React components
+│   ├── lib/                       # Core library
+│   └── cms/                       # CMS schemas
+├── prisma/                         # Database schema and migrations
 ├── assets/                         # Images and static assets
 │   └── logo.png                   # Project logo
 ├── docs/                           # Documentation
-├── .specify/                       # Speckit templates and scripts
-└── .claude/                        # Commands and agents
+└── public/                         # Static files
 ```
 
 ## Contributing
@@ -421,39 +398,16 @@ Ver [specs/](specs/) para especificaciones detalladas de cada feature.
 
 ```
 hooperits-cms/
-├── specs/                          # Especificaciones de features (27 specs)
-│   ├── 001-cms-core/              # Spec del core del CMS
-│   ├── 002-query-language/        # Lenguaje de consulta HQL
-│   ├── 003-document-states/       # Estados draft/published
-│   ├── 004-document-versioning/   # Historial de versiones
-│   ├── 005-rich-text-portable/    # Formato Portable Text
-│   ├── 006-real-time-sync/        # Sincronización WebSocket
-│   ├── 007-advanced-schema-features/
-│   ├── 008-media-library-advanced/
-│   ├── 009-collaboration-features/
-│   ├── 010-real-time-collaboration/
-│   ├── 011-content-releases/
-│   ├── 012-internationalization/
-│   ├── 013-webhooks-events/
-│   ├── 014-search-indexing/
-│   ├── 015-ai-assist/
-│   ├── 016-workflows-approvals/
-│   ├── 017-plugin-system/
-│   ├── 018-studio-customization/
-│   ├── 019-graphql-api/
-│   ├── 020-cli-enhancements/
-│   ├── 021-sdk-enhancements/
-│   ├── 022-multi-tenancy/
-│   ├── 023-advanced-permissions/
-│   ├── 024-analytics-dashboard/
-│   ├── 025-audit-logging/
-│   ├── 026-performance-caching/
-│   └── 027-backup-restore/
+├── src/                            # Código fuente
+│   ├── app/                       # Next.js App Router
+│   ├── components/                # Componentes React
+│   ├── lib/                       # Librería core
+│   └── cms/                       # Schemas del CMS
+├── prisma/                         # Schema y migraciones de base de datos
 ├── assets/                         # Imágenes y assets estáticos
 │   └── logo.png                   # Logo del proyecto
 ├── docs/                           # Documentación
-├── .specify/                       # Templates y scripts de speckit
-└── .claude/                        # Comandos y agentes
+└── public/                         # Archivos estáticos
 ```
 
 ## Contribuir
