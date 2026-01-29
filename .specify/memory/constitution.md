@@ -2,21 +2,21 @@
 =============================================================================
 SYNC IMPACT REPORT
 =============================================================================
-Version Change: 1.2.0 → 1.2.1 (PATCH)
-Bump Rationale: Expanded Principle VII with bilingual requirement
+Version Change: 1.2.1 → 1.3.0 (MINOR)
+Bump Rationale: New principle added (VIII. Open Source Compliance)
 
-Modified Principles:
-  - VII. Living Documentation → Added bilingual (EN/ES) requirement
+Modified Principles: None
+Added Sections:
+  - VIII. Open Source Compliance (AGPL-3.0 requirements)
 
-Added Sections: None
 Removed Sections: None
 
 Templates/Files Status:
   ✅ .specify/templates/plan-template.md - No changes needed
   ✅ .specify/templates/spec-template.md - No changes needed
   ✅ .specify/templates/tasks-template.md - No changes needed
-  ✅ .claude/commands/speckit.implement.md - Updated (bilingual README sync)
-  ✅ README.md - Updated with bilingual structure (EN/ES)
+  ✅ .claude/commands/speckit.implement.md - No changes needed
+  ✅ README.md - Already has AGPL-3.0 license section
 
 Follow-up TODOs: None
 =============================================================================
@@ -91,7 +91,7 @@ Toda autoría y créditos del proyecto DEBEN atribuirse exclusivamente a HOOPERI
 - README, documentación y GitHub DEBEN mencionar únicamente a "HOOPERITS" o "HOOPER IT SERVICES"
 - NO DEBE mencionarse a terceros (herramientas de IA, frameworks de desarrollo asistido, etc.) como co-autores
 - Commits, PRs y reviews automatizados DEBEN usar "HOOPERITS Engineering" como firma
-- La licencia es AGPL-3.0 y el copyright pertenece a HOOPER IT SERVICES
+- El copyright pertenece a HOOPER IT SERVICES
 
 **Rationale**: El producto es propiedad intelectual de HOOPERITS. Las herramientas utilizadas en el desarrollo son medios, no co-autores.
 
@@ -107,6 +107,18 @@ El README.md DEBE mantenerse actualizado y seguir las mejores prácticas de docu
 - **Badges**: DEBE incluir badges de build status, version, y license cuando aplique
 
 **Rationale**: El README es la primera impresión del proyecto. Documentación bilingüe amplía el alcance a mercados hispanohablantes y angloparlantes.
+
+### VIII. Open Source Compliance
+
+Este proyecto es software libre bajo licencia **AGPL-3.0** (GNU Affero General Public License v3.0):
+
+- **Repositorio público**: El código fuente DEBE estar disponible públicamente en GitHub
+- **Copyleft de red**: Cualquier modificación del CMS desplegada en un servidor DEBE compartir el código fuente modificado bajo AGPL-3.0
+- **Atribución requerida**: Los forks y derivados DEBEN mantener los avisos de copyright y licencia
+- **Contribuciones**: Las contribuciones externas serán aceptadas bajo los mismos términos AGPL-3.0
+- **Compatibilidad**: Las dependencias DEBEN ser compatibles con AGPL-3.0 (GPL, MIT, Apache 2.0, BSD)
+
+**Rationale**: AGPL garantiza que mejoras al CMS beneficien a toda la comunidad, incluso cuando se despliega como servicio. Fomenta colaboración y transparencia.
 
 ## Technology Constraints
 
@@ -141,4 +153,4 @@ Esta constitución aplica a todo el desarrollo del CMS.
 3. Documentar migración si hay breaking changes
 4. Incrementar versión según semver
 
-**Version**: 1.2.1 | **Ratified**: 2026-01-29 | **Last Amended**: 2026-01-29
+**Version**: 1.3.0 | **Ratified**: 2026-01-29 | **Last Amended**: 2026-01-29
