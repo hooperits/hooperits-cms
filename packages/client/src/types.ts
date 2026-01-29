@@ -79,3 +79,51 @@ export interface CMSError {
   message: string;
   details?: unknown;
 }
+
+// =============================================================================
+// HQL Types
+// =============================================================================
+
+export interface HQLQueryOptions {
+  maxDepth?: number;
+  maxCost?: number;
+  cacheTTL?: number;
+  noCache?: boolean;
+}
+
+export interface HQLQueryResponse<T = unknown> {
+  data: T;
+  meta: HQLQueryMeta;
+}
+
+export interface HQLQueryMeta {
+  parseTime: number;
+  executeTime: number;
+  totalTime: number;
+  cost: number;
+  cached: boolean;
+  scannedCount: number;
+  returnedCount: number;
+}
+
+export interface HQLError {
+  code: HQLErrorCode;
+  message: string;
+  position?: {
+    line: number;
+    column: number;
+    offset: number;
+  };
+  details?: unknown;
+}
+
+export type HQLErrorCode =
+  | 'PARSE_ERROR'
+  | 'VALIDATION_ERROR'
+  | 'EXECUTION_ERROR'
+  | 'COST_EXCEEDED'
+  | 'DEPTH_EXCEEDED'
+  | 'TIMEOUT'
+  | 'UNKNOWN_TYPE'
+  | 'UNKNOWN_FIELD'
+  | 'INVALID_PARAM';

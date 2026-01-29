@@ -57,11 +57,12 @@ export class S3Storage implements StorageAdapter {
     const { PutObjectCommand } = await import('@aws-sdk/client-s3');
     const client = await this.getClient();
 
+    type ObjectCannedACL = import('@aws-sdk/client-s3').ObjectCannedACL;
     const command = new PutObjectCommand({
       Bucket: this.config.bucket,
       Key: filePath,
       Body: file,
-      ...(this.config.acl && { ACL: this.config.acl }),
+      ...(this.config.acl && { ACL: this.config.acl as ObjectCannedACL }),
     });
 
     await client.send(command);
