@@ -22,7 +22,8 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "cms:migrate": "turbo run migrate --filter=@hooperits/admin",
     "cms:generate": "turbo run generate --filter=@hooperits/cli",
-    "cms:create-admin": "turbo run create-admin --filter=@hooperits/cli"
+    "cms:create-admin": "turbo run create-admin --filter=@hooperits/cli",
+    "prepare": "bash scripts/setup-hooks.sh"
   },
   "devDependencies": {
     "turbo": "^2.3.0",
