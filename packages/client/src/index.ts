@@ -31,3 +31,17 @@ export type {
 
 // React hooks (optional)
 export { useContentList, useContent, useContentBySlug } from './hooks';
+
+// Preview Mode (spec 003-document-states)
+export {
+  isPreviewMode,
+  getPreviewToken,
+  enablePreview,
+  disablePreview,
+  fetchPreviewContent,
+  getPreviewState,
+} from './preview';
+export type { PreviewContentData, PreviewState } from './preview';
+
+// Components
+export { PreviewBanner } from './components/PreviewBanner';

@@ -27,9 +27,19 @@ export {
   ForbiddenError,
   ConflictError,
   BadRequestError,
+  StateTransitionError,
+  TooManyRequestsError,
   isCMSError,
   formatErrorResponse,
 } from './errors';
+
+// Rate limiting
+export {
+  RateLimiter,
+  createRateLimiter,
+  previewTokenRateLimiter,
+} from './rate-limit';
+export type { RateLimitConfig } from './rate-limit';
 
 // Validation
 export {
@@ -84,6 +94,28 @@ export type { MediaRequestContext, MediaApiResponse } from './api/media';
 
 // API handlers - HQL
 export { handleHQLQuery } from './api/hql';
+
+// API handlers - Publish (spec 003-document-states)
+export type { PublishRequestContext, PublishApiResponse } from './api/publish';
+export {
+  handlePublish,
+  handleUnpublish,
+  handleDiscardDraft,
+  handleSchedule,
+  handleCancelSchedule,
+  handleArchive,
+  handleRestore,
+  handleGetHistory,
+  handleGetScheduled,
+} from './api/publish';
+
+// API handlers - Preview (spec 003-document-states)
+export type { PreviewRequestContext, PreviewApiResponse } from './api/preview';
+export {
+  handleCreatePreviewToken,
+  handleRevokePreviewTokens,
+  handleGetPreview,
+} from './api/preview';
 
 // HQL module (HOOPERITS Query Language)
 export * from './hql';

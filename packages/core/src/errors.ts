@@ -79,6 +79,35 @@ export class BadRequestError extends CMSError {
   }
 }
 
+export class StateTransitionError extends CMSError {
+  constructor(
+    public readonly currentStatus: string,
+    public readonly targetStatus: string,
+    public readonly allowedTransitions: string[]
+  ) {
+    const allowed = allowedTransitions.length > 0
+      ? allowedTransitions.join(', ')
+      : 'none';
+    super(
+      `Cannot transition from ${currentStatus} to ${targetStatus}. Valid transitions: ${allowed}`,
+      'INVALID_STATE_TRANSITION',
+      400,
+      { currentStatus, targetStatus, allowedTransitions }
+    );
+    this.name = 'StateTransitionError';
+  }
+}
+
+export class TooManyRequestsError extends CMSError {
+  constructor(
+    message: string = 'Too many requests',
+    public readonly retryAfterMs?: number
+  ) {
+    super(message, 'TOO_MANY_REQUESTS', 429, { retryAfterMs });
+    this.name = 'TooManyRequestsError';
+  }
+}
+
 export function isCMSError(error: unknown): error is CMSError {
   return error instanceof CMSError;
 }

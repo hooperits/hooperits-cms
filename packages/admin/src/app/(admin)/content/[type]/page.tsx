@@ -4,27 +4,34 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { listContent, getContentType } from '@hooperits/cms';
+import { listContentForAdmin, getContentType } from '@hooperits/cms';
+import type { DocumentStatus } from '@prisma/client';
+import { DocumentStateIndicator } from '@/components/content/DocumentStateIndicator';
+import { DocumentStateFilterTabs } from '@/components/content/DocumentStateFilter';
 
 interface Props {
   params: Promise<{ type: string }>;
-  searchParams: Promise<{ page?: string; status?: string }>;
+  searchParams: Promise<{ page?: string; status?: string; showArchived?: string }>;
 }
 
 export default async function ContentListPage({ params, searchParams }: Props) {
   const { type } = await params;
-  const { page = '1', status } = await searchParams;
+  const { page = '1', status, showArchived } = await searchParams;
 
   const contentType = await getContentType(type);
   if (!contentType) {
     notFound();
   }
 
-  const result = await listContent(type, {
+  const includeArchived = showArchived === 'true';
+  const result = await listContentForAdmin(type, {
     page: parseInt(page, 10),
     limit: 20,
-    status: status as 'DRAFT' | 'PUBLISHED' | undefined,
+    status: status as DocumentStatus | undefined,
+    includeArchived,
   });
+
+  const currentStatus = (status as DocumentStatus) || 'ALL';
 
   return (
     <div>
@@ -39,25 +46,26 @@ export default async function ContentListPage({ params, searchParams }: Props) {
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex gap-2">
-        <Link
-          href={`/content/${type}`}
-          className={`px-3 py-1 rounded ${!status ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
-        >
-          All
-        </Link>
-        <Link
-          href={`/content/${type}?status=PUBLISHED`}
-          className={`px-3 py-1 rounded ${status === 'PUBLISHED' ? 'bg-green-200' : 'hover:bg-gray-100'}`}
-        >
-          Published
-        </Link>
-        <Link
-          href={`/content/${type}?status=DRAFT`}
-          className={`px-3 py-1 rounded ${status === 'DRAFT' ? 'bg-yellow-200' : 'hover:bg-gray-100'}`}
-        >
-          Drafts
-        </Link>
+      <div className="mb-4 flex items-center justify-between">
+        <DocumentStateFilterTabs
+          currentStatus={currentStatus}
+          includeArchived={includeArchived}
+          basePath={`/content/${type}`}
+        />
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          <input
+            type="checkbox"
+            checked={includeArchived}
+            onChange={() => {}}
+            className="rounded border-gray-300"
+          />
+          <a
+            href={`/content/${type}?${status ? `status=${status}&` : ''}showArchived=${!includeArchived}`}
+            className="hover:text-gray-900"
+          >
+            Show Archived
+          </a>
+        </label>
       </div>
 
       {/* Content Table */}
@@ -92,15 +100,14 @@ export default async function ContentListPage({ params, searchParams }: Props) {
                   {item.slug || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 py-1 text-xs rounded ${
-                      item.status === 'PUBLISHED'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {item.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <DocumentStateIndicator status={item.status} size="sm" />
+                    {item.hasPendingChanges && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                        Changes pending
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(item.updatedAt).toLocaleDateString()}
@@ -136,7 +143,7 @@ export default async function ContentListPage({ params, searchParams }: Props) {
             (pageNum) => (
               <Link
                 key={pageNum}
-                href={`/content/${type}?page=${pageNum}${status ? `&status=${status}` : ''}`}
+                href={`/content/${type}?page=${pageNum}${status ? `&status=${status}` : ''}${includeArchived ? '&showArchived=true' : ''}`}
                 className={`px-3 py-1 rounded ${
                   pageNum === result.pagination.page
                     ? 'bg-blue-600 text-white'
