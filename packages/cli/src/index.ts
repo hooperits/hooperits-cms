@@ -9,6 +9,7 @@ import { init } from './commands/init';
 import { migrate } from './commands/migrate';
 import { generate } from './commands/generate';
 import { createAdmin } from './commands/create-admin';
+import { versions } from './commands/versions';
 
 program
   .name('hooperits-cms')
@@ -35,5 +36,14 @@ program
   .command('create-admin')
   .description('Create the first admin user')
   .action(createAdmin);
+
+program
+  .command('versions')
+  .description('Manage document versions and retention cleanup')
+  .option('--stats', 'Show version statistics')
+  .option('--cleanup', 'Run retention cleanup')
+  .option('--content-type <type>', 'Filter by content type')
+  .option('--dry-run', 'Preview cleanup without deleting')
+  .action(versions);
 
 program.parse();

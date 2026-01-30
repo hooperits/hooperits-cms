@@ -2,11 +2,13 @@
 
 /**
  * HOOPERITS CMS - Dynamic Form Component
- * Renders form fields based on schema definition
+ * Renders form fields based on schema definition with auto-save
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAutoSave, checkAllRecovery, type RecoverableData } from '@hooperits/client';
+import { RecoveryPrompt } from '@/components/versioning';
 import type { FieldDefinition, SlugFieldOptions } from '@hooperits/cms';
 import { TextField } from './fields/TextField';
 import { RichTextField } from './fields/RichTextField';
@@ -42,6 +44,54 @@ export function DynamicForm({
   const [loading, setLoading] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Auto-save state
+  const [recoverable, setRecoverable] = useState<RecoverableData | null>(null);
+  const [showRecovery, setShowRecovery] = useState(false);
+
+  // Auto-save hook (only for existing content)
+  const autoSave = useAutoSave({
+    contentId: contentId || 'new',
+    contentType: contentTypeName,
+    debounceMs: 3000,
+    enableLocalBackup: true,
+    onError: (error) => console.warn('Auto-save failed:', error),
+  });
+
+  // Check for recovery on mount
+  useEffect(() => {
+    if (!contentId) return;
+
+    checkAllRecovery(contentTypeName, contentId).then((recovered) => {
+      if (recovered) {
+        const isNewer = recovered.savedAt > new Date(initialData.updatedAt as string || 0);
+        if (isNewer) {
+          setRecoverable(recovered);
+          setShowRecovery(true);
+        }
+      }
+    });
+  }, [contentId, contentTypeName, initialData]);
+
+  // Trigger auto-save on data changes (only for existing content)
+  useEffect(() => {
+    if (!contentId) return;
+    if (JSON.stringify(data) === JSON.stringify(initialData)) return;
+    autoSave.triggerSave(data);
+  }, [data, contentId, initialData, autoSave]);
+
+  const handleRecover = useCallback(() => {
+    if (recoverable) {
+      setData(recoverable.data);
+      setShowRecovery(false);
+      autoSave.clearRecovery();
+    }
+  }, [recoverable, autoSave]);
+
+  const handleDiscardRecovery = useCallback(() => {
+    setShowRecovery(false);
+    autoSave.clearRecovery();
+  }, [autoSave]);
 
   const updateField = (name: string, value: unknown) => {
     setData((prev) => ({ ...prev, [name]: value }));
@@ -278,6 +328,16 @@ export function DynamicForm({
 
   return (
     <>
+      {/* Recovery Prompt */}
+      <RecoveryPrompt
+        isOpen={showRecovery}
+        recoverable={recoverable}
+        currentData={data}
+        onRecover={handleRecover}
+        onDiscard={handleDiscardRecovery}
+        onClose={() => setShowRecovery(false)}
+      />
+
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <div
@@ -373,7 +433,7 @@ export function DynamicForm({
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-4 border-t">
-        <div>
+        <div className="flex items-center gap-4">
           {contentId && (
             <button
               type="button"
@@ -383,6 +443,29 @@ export function DynamicForm({
             >
               Delete
             </button>
+          )}
+          {/* Auto-save indicator */}
+          {contentId && (
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              {autoSave.isSaving && (
+                <>
+                  <span className="animate-spin h-3 w-3 border-2 border-gray-300 border-t-blue-600 rounded-full" />
+                  Saving...
+                </>
+              )}
+              {!autoSave.isSaving && autoSave.isDirty && (
+                <>
+                  <span className="h-2 w-2 bg-yellow-500 rounded-full" />
+                  Unsaved changes
+                </>
+              )}
+              {!autoSave.isSaving && !autoSave.isDirty && autoSave.lastSavedAt && (
+                <>
+                  <span className="h-2 w-2 bg-green-500 rounded-full" />
+                  Saved
+                </>
+              )}
+            </span>
           )}
         </div>
         <div className="flex gap-4">

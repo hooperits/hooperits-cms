@@ -168,7 +168,7 @@ Available functions: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `
 | 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implemented |
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | ✅ Implemented |
 | 003 | Document States | Draft/published states with preview & scheduling | ✅ Implemented |
-| 004 | Document Versioning | Full history with diff, rollback & retention | 🔲 Planned |
+| 004 | Document Versioning | Full history with diff, rollback & retention | ✅ Implemented |
 | 005 | Rich Text | Portable Text format for structured rich content | 🔲 Planned |
 | 006 | Real-time Sync | WebSocket sync for real-time updates | 🔲 Planned |
 
@@ -431,7 +431,7 @@ Funciones disponibles: `count()`, `length()`, `lower()`, `upper()`, `defined()`,
 | 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implementado |
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | ✅ Implementado |
 | 003 | Document States | Estados draft/published con preview y programación | ✅ Implementado |
-| 004 | Document Versioning | Historial completo con diff, rollback y retención | 🔲 Planificado |
+| 004 | Document Versioning | Historial completo con diff, rollback y retención | ✅ Implementado |
 | 005 | Rich Text | Formato Portable Text para contenido estructurado | 🔲 Planificado |
 | 006 | Real-time Sync | Sincronización WebSocket en tiempo real | 🔲 Planificado |
 

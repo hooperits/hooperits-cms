@@ -4,6 +4,7 @@
  */
 
 import { db } from '../db';
+import { logger } from '../logger';
 import { NotFoundError } from '../errors';
 import type { VersionChangeType, Prisma } from '@prisma/client';
 
@@ -42,14 +43,22 @@ export interface VersionSummary {
 }
 
 /**
- * Calculate the size in bytes of a JSON object
+ * Calculate the size in bytes of a JSON object.
+ * Used for version size tracking and storage optimization.
+ *
+ * @param data - The JSON data to measure
+ * @returns Size in bytes
  */
 export function calculateVersionSize(data: Record<string, unknown>): number {
   return Buffer.byteLength(JSON.stringify(data), 'utf8');
 }
 
 /**
- * Get the next version number for a content item
+ * Get the next sequential version number for a content item.
+ * Returns 1 if no versions exist.
+ *
+ * @param contentId - The content item ID
+ * @returns The next version number
  */
 export async function getNextVersionNumber(contentId: string): Promise<number> {
   const lastVersion = await db.documentVersion.findFirst({
@@ -62,7 +71,17 @@ export async function getNextVersionNumber(contentId: string): Promise<number> {
 }
 
 /**
- * Create a new version for a content item
+ * Create a new version for a content item.
+ * Stores a snapshot of the content data with metadata.
+ *
+ * @param input - Version creation input
+ * @param input.contentId - The content item ID
+ * @param input.data - The content data to snapshot
+ * @param input.changeType - Type of change (MANUAL, AUTO, ROLLBACK, PUBLISH, IMPORT)
+ * @param input.changeSummary - Optional description of the change
+ * @param input.createdById - The user ID who created this version
+ * @returns The created version with full metadata
+ * @throws NotFoundError if content doesn't exist
  */
 export async function createVersion(input: VersionInput): Promise<Version> {
   const { contentId, data, changeType = 'MANUAL', changeSummary, createdById } = input;
@@ -99,6 +118,14 @@ export async function createVersion(input: VersionInput): Promise<Version> {
     },
   });
 
+  logger.info(`Version created: ${contentId} v${versionNumber} (${changeType})`, {
+    contentId,
+    versionNumber,
+    changeType,
+    size,
+    userId: createdById,
+  });
+
   return {
     id: version.id,
     contentId: version.contentId,
@@ -116,8 +143,14 @@ export async function createVersion(input: VersionInput): Promise<Version> {
 }
 
 /**
- * Create a version internally during content update
- * This is called by the content service when content is updated
+ * Create a version internally during content update.
+ * Called automatically by the content service to preserve history.
+ *
+ * @param contentId - The content item ID being updated
+ * @param previousData - The content data before the update
+ * @param userId - The user performing the update
+ * @param changeType - Type of change (defaults to MANUAL)
+ * @returns The created version
  */
 export async function createVersionOnUpdate(
   contentId: string,
@@ -176,7 +209,19 @@ const versionFullSelect = {
 } as const;
 
 /**
- * List versions for a content item with pagination and filtering
+ * List versions for a content item with pagination and filtering.
+ * Returns version summaries (without full data) for performance.
+ *
+ * @param contentId - The content item ID
+ * @param options - Pagination and filtering options
+ * @param options.page - Page number (default: 1)
+ * @param options.limit - Items per page (default: 20)
+ * @param options.changeType - Filter by change type
+ * @param options.author - Filter by author user ID
+ * @param options.from - Filter versions created after this date
+ * @param options.to - Filter versions created before this date
+ * @returns Paginated list of version summaries
+ * @throws NotFoundError if content doesn't exist
  */
 export async function listVersions(
   contentId: string,
@@ -240,7 +285,13 @@ export async function listVersions(
 }
 
 /**
- * Get a single version by content ID and version number
+ * Get a single version by content ID and version number.
+ * Returns the full version including data content.
+ *
+ * @param contentId - The content item ID
+ * @param versionNumber - The version number to retrieve
+ * @returns The full version with data
+ * @throws NotFoundError if version doesn't exist
  */
 export async function getVersion(
   contentId: string,
@@ -276,7 +327,10 @@ export async function getVersion(
 }
 
 /**
- * Get the latest version number for a content item
+ * Get the latest version number for a content item.
+ *
+ * @param contentId - The content item ID
+ * @returns The highest version number, or null if no versions exist
  */
 export async function getLatestVersionNumber(contentId: string): Promise<number | null> {
   const version = await db.documentVersion.findFirst({
@@ -302,7 +356,14 @@ export interface CompareVersionsResult {
 }
 
 /**
- * Compare two versions and generate a diff
+ * Compare two versions and generate a detailed diff.
+ * Identifies added, deleted, and modified fields between versions.
+ *
+ * @param contentId - The content item ID
+ * @param fromVersionNumber - The source version number
+ * @param toVersionNumber - The target version number
+ * @returns Comparison result with changes and summary
+ * @throws NotFoundError if either version doesn't exist
  */
 export async function compareVersions(
   contentId: string,
@@ -358,10 +419,18 @@ export interface RollbackResult {
 }
 
 /**
- * Rollback content to a previous version
- * 1. Saves current state as a new version
+ * Rollback content to a previous version.
+ * This operation:
+ * 1. Saves the current state as a new version (preserving history)
  * 2. Updates content.data with the target version's data
- * 3. Creates a new ROLLBACK version
+ * 3. Creates a new ROLLBACK version for audit trail
+ * 4. Sets document status to DRAFT
+ *
+ * @param contentId - The content item ID
+ * @param targetVersionNumber - The version number to restore
+ * @param userId - The user performing the rollback
+ * @returns The updated content and new version number
+ * @throws NotFoundError if content or version doesn't exist
  */
 export async function rollbackToVersion(
   contentId: string,
@@ -409,6 +478,13 @@ export async function rollbackToVersion(
     changeType: 'ROLLBACK',
     changeSummary: `Rolled back to v${targetVersionNumber}`,
     createdById: userId,
+  });
+
+  logger.info(`Content rolled back: ${contentId} to v${targetVersionNumber}`, {
+    contentId,
+    targetVersionNumber,
+    newVersionNumber: newVersion.versionNumber,
+    userId,
   });
 
   return {

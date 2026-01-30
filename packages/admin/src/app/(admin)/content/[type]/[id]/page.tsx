@@ -3,6 +3,7 @@
  */
 
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { getContentWithState, getContentType, getSchema } from '@hooperits/cms';
 import { DynamicForm } from '@/components/forms/DynamicForm';
 import { DocumentStateIndicator } from '@/components/content/DocumentStateIndicator';
@@ -42,6 +43,15 @@ export default async function ContentEditPage({ params }: Props) {
               hasPendingChanges={content.hasPendingChanges}
               size="lg"
             />
+            <Link
+              href={`/content/${type}/${id}/versions`}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              History
+            </Link>
             <PublishButton
               contentId={content.id}
               contentType={type}
