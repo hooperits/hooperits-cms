@@ -20,9 +20,21 @@ enum UserRole {
   VIEWER
 }
 
-enum ContentStatus {
-  DRAFT
-  PUBLISHED
+enum DocumentStatus {
+  DRAFT       // Content has unpublished changes
+  PUBLISHED   // Content is live with no pending changes
+  SCHEDULED   // Content is scheduled for future publish
+  UNPUBLISHED // Content was published but is now hidden
+  ARCHIVED    // Content is archived (soft-deleted)
+}
+
+enum PublishAction {
+  PUBLISH   // Draft → Published
+  UNPUBLISH // Published → Unpublished
+  SCHEDULE  // Draft → Scheduled
+  CANCEL    // Scheduled → Draft
+  ARCHIVE   // Unpublished → Archived
+  RESTORE   // Archived → Unpublished
 }
 
 // =============================================================================
@@ -40,9 +52,12 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  createdContent Content[] @relation("CreatedBy")
-  updatedContent Content[] @relation("UpdatedBy")
-  uploadedMedia  Media[]
+  createdContent   Content[]      @relation("CreatedBy")
+  updatedContent   Content[]      @relation("UpdatedBy")
+  publishedContent Content[]      @relation("PublishedContent")
+  uploadedMedia    Media[]
+  publishEvents    PublishEvent[]
+  previewTokens    PreviewToken[]
 
   @@map("users")
 }
@@ -66,14 +81,14 @@ model ContentType {
 
 /// Content stores instances of content items
 model Content {
-  id        String        @id @default(uuid())
+  id        String         @id @default(uuid())
   typeId    String
-  type      ContentType   @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  type      ContentType    @relation(fields: [typeId], references: [id], onDelete: Cascade)
   data      Json
-  status    ContentStatus @default(DRAFT)
+  status    DocumentStatus @default(DRAFT)
   slug      String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 
   // Audit fields
   createdById String
@@ -81,10 +96,25 @@ model Content {
   updatedById String
   updatedBy   User   @relation("UpdatedBy", fields: [updatedById], references: [id])
 
+  // Document state fields (spec 003)
+  publishedData   Json?
+  publishedAt     DateTime?
+  publishedById   String?
+  publishedBy     User?     @relation("PublishedContent", fields: [publishedById], references: [id])
+  scheduledAt     DateTime?
+  archivedAt      DateTime?
+
+  // Relations for document states
+  publishEvents  PublishEvent[]
+  previewTokens  PreviewToken[]
+
   // Indexes for common queries
   @@unique([typeId, slug])
   @@index([typeId, status])
   @@index([typeId, createdAt])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([publishedAt])
   @@map("contents")
 }
 
@@ -104,4 +134,41 @@ model Media {
   uploadedBy   User     @relation(fields: [uploadedById], references: [id])
 
   @@map("media")
+}
+
+// =============================================================================
+// DOCUMENT STATES (spec 003-document-states)
+// =============================================================================
+
+/// PublishEvent stores audit trail for all publishing actions
+model PublishEvent {
+  id        String        @id @default(uuid())
+  contentId String
+  content   Content       @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  action    PublishAction
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  timestamp DateTime      @default(now())
+  metadata  Json?
+
+  @@index([contentId, timestamp])
+  @@index([userId, timestamp])
+  @@map("publish_events")
+}
+
+/// PreviewToken stores temporary tokens for draft preview access
+model PreviewToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.VarChar(64)
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdBy String
+  creator   User     @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([contentId])
+  @@index([expiresAt])
+  @@map("preview_tokens")
 }

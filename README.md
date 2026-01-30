@@ -38,6 +38,7 @@ HOOPERITS CMS is a headless content management system designed for developers wh
 | Auto-generated Admin UI | ✅ Implemented | Panel generated from schemas |
 | Type-safe SDK | ✅ Implemented | Client with TypeScript types |
 | HQL Query Language | ✅ Implemented | GROQ-inspired query language for flexible content retrieval |
+| Document States | ✅ Implemented | Draft/published workflow with preview, scheduling, and archive |
 | Image optimization | ✅ Implemented | Automatic image optimization with Sharp |
 | RBAC Authentication | ✅ Implemented | Role-based access control (Admin/Editor/Viewer) |
 | CLI Tools | ✅ Implemented | Init, migrate, generate, create-admin commands |
@@ -166,7 +167,7 @@ Available functions: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `
 |------|------|-------------|--------|
 | 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implemented |
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | ✅ Implemented |
-| 003 | Document States | Draft/published states with preview & scheduling | 🔲 Planned |
+| 003 | Document States | Draft/published states with preview & scheduling | ✅ Implemented |
 | 004 | Document Versioning | Full history with diff, rollback & retention | 🔲 Planned |
 | 005 | Rich Text | Portable Text format for structured rich content | 🔲 Planned |
 | 006 | Real-time Sync | WebSocket sync for real-time updates | 🔲 Planned |
@@ -300,6 +301,7 @@ HOOPERITS CMS es un sistema de gestión de contenido headless diseñado para des
 | Admin UI automático | ✅ Implementado | Panel generado desde schemas |
 | Type-safe SDK | ✅ Implementado | Cliente con tipos TypeScript |
 | HQL Query Language | ✅ Implementado | Lenguaje de consulta inspirado en GROQ |
+| Document States | ✅ Implementado | Flujo borrador/publicado con preview, programación y archivo |
 | Image optimization | ✅ Implementado | Optimización automática con Sharp |
 | Autenticación RBAC | ✅ Implementado | Control de acceso por roles (Admin/Editor/Viewer) |
 | CLI Tools | ✅ Implementado | Comandos init, migrate, generate, create-admin |
@@ -428,7 +430,7 @@ Funciones disponibles: `count()`, `length()`, `lower()`, `upper()`, `defined()`,
 |------|--------|-------------|--------|
 | 001 | CMS Core | CRUD, media, auth, schemas, REST API, CLI | ✅ Implementado |
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | ✅ Implementado |
-| 003 | Document States | Estados draft/published con preview y programación | 🔲 Planificado |
+| 003 | Document States | Estados draft/published con preview y programación | ✅ Implementado |
 | 004 | Document Versioning | Historial completo con diff, rollback y retención | 🔲 Planificado |
 | 005 | Rich Text | Formato Portable Text para contenido estructurado | 🔲 Planificado |
 | 006 | Real-time Sync | Sincronización WebSocket en tiempo real | 🔲 Planificado |

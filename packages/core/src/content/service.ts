@@ -7,11 +7,11 @@ import { db } from '../db';
 import { getCache } from '../cache';
 import { NotFoundError, ValidationError } from '../errors';
 import { getSchema, validateContent } from '../schema';
-import type { ContentStatus, Prisma } from '@prisma/client';
+import type { DocumentStatus, Prisma } from '@prisma/client';
 
 export interface ContentInput {
   data: Record<string, unknown>;
-  status?: ContentStatus;
+  status?: DocumentStatus;
   slug?: string | null;
 }
 
@@ -24,7 +24,7 @@ export interface Content {
     label: string;
   };
   data: Record<string, unknown>;
-  status: ContentStatus;
+  status: DocumentStatus;
   slug: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -35,12 +35,27 @@ export interface Content {
 export interface ListContentOptions {
   page?: number;
   limit?: number;
-  status?: ContentStatus;
+  status?: DocumentStatus;
   sort?: string;
 }
 
 export interface ListContentResult {
   items: Content[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface AdminContent extends Content {
+  hasPendingChanges: boolean;
+  publishedData: Record<string, unknown> | null;
+}
+
+export interface AdminListContentResult {
+  items: AdminContent[];
   pagination: {
     page: number;
     limit: number;
@@ -62,6 +77,11 @@ const contentSelect = {
   updatedAt: true,
   createdBy: { select: { id: true, name: true } },
   updatedBy: { select: { id: true, name: true } },
+} satisfies Prisma.ContentSelect;
+
+const adminContentSelect = {
+  ...contentSelect,
+  publishedData: true,
 } satisfies Prisma.ContentSelect;
 
 /**
@@ -236,6 +256,7 @@ export async function createContent(
 
 /**
  * Update a content item
+ * When editing published content, preserves publishedData and sets status to DRAFT
  */
 export async function updateContent(
   id: string,
@@ -269,11 +290,19 @@ export async function updateContent(
     }
   }
 
+  // Determine status update based on current state
+  // When editing PUBLISHED content with data changes, switch to DRAFT (pending changes)
+  // publishedData is preserved - only publish() operation updates it
+  let statusUpdate: DocumentStatus | undefined = input.status;
+  if (input.data && existing.status === 'PUBLISHED' && !input.status) {
+    statusUpdate = 'DRAFT';
+  }
+
   const content = await db.content.update({
     where: { id },
     data: {
       ...(input.data && { data: input.data as Prisma.InputJsonValue }),
-      ...(input.status && { status: input.status }),
+      ...(statusUpdate && { status: statusUpdate }),
       ...(input.slug !== undefined && { slug: input.slug }),
       updatedById: userId,
     },
@@ -322,4 +351,141 @@ export async function publishContent(id: string, userId: string): Promise<Conten
  */
 export async function unpublishContent(id: string, userId: string): Promise<Content> {
   return updateContent(id, { status: 'DRAFT' }, userId);
+}
+
+// =============================================================================
+// PUBLIC API QUERIES (spec 003-document-states)
+// =============================================================================
+
+/**
+ * List published content for public API
+ * Only returns content with status = PUBLISHED
+ */
+export async function listPublishedContent(
+  typeName: string,
+  options: Omit<ListContentOptions, 'status'> = {}
+): Promise<ListContentResult> {
+  return listContent(typeName, { ...options, status: 'PUBLISHED' });
+}
+
+/**
+ * Get published content by slug for public API
+ * Only returns content with status = PUBLISHED
+ */
+export async function getPublishedContentBySlug(
+  typeName: string,
+  slug: string
+): Promise<Content> {
+  const cache = getCache();
+  const cacheKey = `content:published:${typeName}:${slug}`;
+
+  // Check cache
+  const cached = cache.get<Content>(cacheKey);
+  if (cached) return cached;
+
+  const contentType = await db.contentType.findUnique({
+    where: { name: typeName },
+  });
+
+  if (!contentType) {
+    throw new NotFoundError('ContentType', typeName);
+  }
+
+  const content = await db.content.findFirst({
+    where: {
+      typeId: contentType.id,
+      slug,
+      status: 'PUBLISHED',
+    },
+    select: contentSelect,
+  });
+
+  if (!content) {
+    throw new NotFoundError('Content', `${typeName}/${slug}`);
+  }
+
+  const result = content as unknown as Content;
+  cache.set(cacheKey, result, [`content:${content.id}`, `type:${contentType.id}`]);
+
+  return result;
+}
+
+// =============================================================================
+// ADMIN API QUERIES (spec 003-document-states)
+// =============================================================================
+
+export interface AdminListContentOptions extends ListContentOptions {
+  includeArchived?: boolean;
+}
+
+/**
+ * List content for admin panel
+ * By default excludes ARCHIVED content, can be included with includeArchived option
+ * Includes hasPendingChanges computed field
+ */
+export async function listContentForAdmin(
+  typeName: string,
+  options: AdminListContentOptions = {}
+): Promise<AdminListContentResult> {
+  const { page = 1, limit = 20, status, sort = '-createdAt', includeArchived = false } = options;
+
+  // Get content type
+  const contentType = await db.contentType.findUnique({
+    where: { name: typeName },
+  });
+
+  if (!contentType) {
+    throw new NotFoundError('ContentType', typeName);
+  }
+
+  // Build where clause
+  const where: Prisma.ContentWhereInput = {
+    typeId: contentType.id,
+    // Apply status filter if provided, otherwise exclude archived unless requested
+    ...(status
+      ? { status }
+      : !includeArchived && { status: { not: 'ARCHIVED' } }),
+  };
+
+  // Build order by
+  const isDesc = sort.startsWith('-');
+  const sortField = isDesc ? sort.slice(1) : sort;
+  const orderBy: Prisma.ContentOrderByWithRelationInput = {
+    [sortField]: isDesc ? 'desc' : 'asc',
+  };
+
+  // Execute queries with publishedData for pending changes detection
+  const [items, total] = await Promise.all([
+    db.content.findMany({
+      where,
+      select: adminContentSelect,
+      orderBy,
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    db.content.count({ where }),
+  ]);
+
+  // Compute hasPendingChanges for each item
+  const adminItems: AdminContent[] = items.map((item) => {
+    const publishedData = item.publishedData as Record<string, unknown> | null;
+    const hasPending = publishedData !== null &&
+      JSON.stringify(item.data) !== JSON.stringify(publishedData);
+
+    return {
+      ...(item as unknown as Content),
+      publishedData,
+      hasPendingChanges: hasPending,
+    };
+  });
+
+  return {
+    items: adminItems,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
