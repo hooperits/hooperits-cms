@@ -113,3 +113,101 @@ export {
   autoInitializeScheduler,
   registerSchedulerShutdown,
 } from './scheduler';
+
+// Version Service (spec 004-document-versioning)
+export type {
+  VersionInput,
+  Version,
+  VersionSummary,
+  ListVersionsOptions,
+  ListVersionsResult,
+  CompareVersionsResult,
+  RollbackResult,
+  AutoSaveResult,
+  RecoverableVersionResult,
+} from './version';
+
+export {
+  createVersion,
+  createVersionOnUpdate,
+  getNextVersionNumber,
+  calculateVersionSize,
+  listVersions,
+  getVersion,
+  getLatestVersionNumber,
+  compareVersions,
+  rollbackToVersion,
+  autoSaveVersion,
+  getRecoverableVersion,
+  consolidateAutoSaves,
+  updateVersionMetadata,
+} from './version';
+
+export type { UpdateVersionMetadataInput } from './version';
+
+// Version Diff (spec 004-document-versioning)
+export type {
+  DiffKind,
+  TextDiffSegment,
+  DiffChange,
+  DiffSummary,
+  VersionDiff,
+  FieldDiff,
+} from './version-diff';
+
+export {
+  generateTextDiff,
+  generateDiff,
+  formatDiffForUI,
+  createChangeSummary,
+} from './version-diff';
+
+// Version Retention (spec 004-document-versioning)
+export type {
+  RetentionPolicy,
+  RetentionCleanupResult,
+} from './version-retention';
+
+export {
+  DEFAULT_RETENTION_POLICY,
+  getRetentionPolicy,
+  updateRetentionPolicy,
+  listRetentionPolicies,
+  applyRetentionPolicy,
+  processAllRetentionPolicies,
+  RetentionScheduler,
+  getRetentionScheduler,
+  initializeRetentionScheduler,
+  shutdownRetentionScheduler,
+} from './version-retention';
+
+// Version Validation (spec 004-document-versioning)
+export type {
+  VersionChangeType,
+  VersionListQueryInput,
+  GetVersionParams,
+  CompareVersionsQuery,
+  UpdateVersionInput,
+  AutoSaveInput,
+  CreateVersionInput,
+  RetentionPolicyInput,
+} from './version-validation';
+
+export {
+  versionChangeTypeSchema,
+  versionListQuerySchema,
+  versionNumberSchema,
+  getVersionParamsSchema,
+  compareVersionsQuerySchema,
+  updateVersionSchema,
+  autoSaveSchema,
+  createVersionSchema,
+  retentionPolicySchema,
+  validateVersionListQuery,
+  validateGetVersionParams,
+  validateCompareVersionsQuery,
+  validateUpdateVersion,
+  validateAutoSave,
+  validateCreateVersion,
+  validateRetentionPolicy,
+} from './version-validation';
