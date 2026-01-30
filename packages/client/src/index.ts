@@ -45,3 +45,18 @@ export type { PreviewContentData, PreviewState } from './preview';
 
 // Components
 export { PreviewBanner } from './components/PreviewBanner';
+
+// Auto-save (spec 004-document-versioning)
+export {
+  useAutoSave,
+  saveToLocalStorage,
+  loadFromLocalStorage,
+  clearLocalStorage,
+  checkServerRecovery,
+  checkAllRecovery,
+} from './auto-save';
+export type {
+  AutoSaveConfig,
+  AutoSaveState,
+  RecoverableData,
+} from './auto-save';
