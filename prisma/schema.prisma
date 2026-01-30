@@ -37,6 +37,14 @@ enum PublishAction {
   RESTORE   // Archived → Unpublished
 }
 
+enum VersionChangeType {
+  MANUAL   // User clicked save
+  AUTO     // Auto-save
+  ROLLBACK // Created by rollback operation
+  PUBLISH  // Snapshot at publish time
+  IMPORT   // Created via import/migration
+}
+
 // =============================================================================
 // MODELS
 // =============================================================================
@@ -59,6 +67,10 @@ model User {
   publishEvents    PublishEvent[]
   previewTokens    PreviewToken[]
 
+  // Document versioning relations (spec 004)
+  createdVersions  DocumentVersion[]
+  updatedPolicies  RetentionPolicy[]
+
   @@map("users")
 }
 
@@ -74,7 +86,8 @@ model ContentType {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  contents Content[]
+  contents        Content[]
+  retentionPolicy RetentionPolicy?
 
   @@map("content_types")
 }
@@ -107,6 +120,9 @@ model Content {
   // Relations for document states
   publishEvents  PublishEvent[]
   previewTokens  PreviewToken[]
+
+  // Document versioning relation (spec 004)
+  versions       DocumentVersion[]
 
   // Indexes for common queries
   @@unique([typeId, slug])
@@ -171,4 +187,60 @@ model PreviewToken {
   @@index([contentId])
   @@index([expiresAt])
   @@map("preview_tokens")
+}
+
+// =============================================================================
+// DOCUMENT VERSIONING (spec 004-document-versioning)
+// =============================================================================
+
+/// DocumentVersion stores historical snapshots of content
+model DocumentVersion {
+  id            String            @id @default(uuid())
+  contentId     String
+  content       Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  // Version data
+  versionNumber Int               // Sequential per content (1, 2, 3...)
+  data          Json              // Snapshot of Content.data at this point
+  changeType    VersionChangeType @default(MANUAL)
+  changeSummary String?           // Optional: "Updated title", "Added section"
+
+  // Metadata
+  size          Int               // Size in bytes of data JSON
+  name          String?           // Optional user-assigned name
+  isProtected   Boolean           @default(false) // Protected from retention cleanup
+
+  // Audit
+  createdById   String
+  createdBy     User              @relation(fields: [createdById], references: [id])
+  createdAt     DateTime          @default(now())
+
+  // Performance indexes
+  @@unique([contentId, versionNumber])
+  @@index([contentId, createdAt])
+  @@index([contentId, changeType])
+  @@index([createdById])
+  @@map("document_versions")
+}
+
+/// RetentionPolicy defines version cleanup rules per content type
+model RetentionPolicy {
+  id            String      @id @default(uuid())
+  contentTypeId String      @unique
+  contentType   ContentType @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
+
+  // Policy rules (null = unlimited)
+  maxVersions   Int?        // Keep at most N versions per content
+  maxAgeDays    Int?        // Delete versions older than N days
+
+  // Behavior
+  keepPublished Boolean     @default(true)  // Always keep published versions
+  keepNamed     Boolean     @default(true)  // Always keep named versions
+
+  // Audit
+  updatedAt     DateTime    @updatedAt
+  updatedById   String?
+  updatedBy     User?       @relation(fields: [updatedById], references: [id])
+
+  @@map("retention_policies")
 }

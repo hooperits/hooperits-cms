@@ -8,6 +8,7 @@ import { getCache } from '../cache';
 import { NotFoundError, ValidationError } from '../errors';
 import { getSchema, validateContent } from '../schema';
 import type { DocumentStatus, Prisma } from '@prisma/client';
+import { createVersionOnUpdate } from './version';
 
 export interface ContentInput {
   data: Record<string, unknown>;
@@ -296,6 +297,16 @@ export async function updateContent(
   let statusUpdate: DocumentStatus | undefined = input.status;
   if (input.data && existing.status === 'PUBLISHED' && !input.status) {
     statusUpdate = 'DRAFT';
+  }
+
+  // Create a version before updating if data is being changed
+  if (input.data) {
+    await createVersionOnUpdate(
+      id,
+      existing.data as Record<string, unknown>,
+      userId,
+      'MANUAL'
+    );
   }
 
   const content = await db.content.update({

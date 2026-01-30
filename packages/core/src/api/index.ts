@@ -45,3 +45,18 @@ export {
   handleRevokePreviewTokens,
   handleGetPreview,
 } from './preview';
+
+// Version API (spec 004-document-versioning)
+export type { VersionRequestContext, VersionApiResponse, RetentionRequestContext } from './version';
+export {
+  handleListVersions,
+  handleGetVersion,
+  handleUpdateVersion,
+  handleCompareVersions,
+  handleRollbackVersion,
+  handleAutoSave,
+  handleGetRecoverable,
+  handleListRetentionPolicies,
+  handleGetRetentionPolicy,
+  handleUpdateRetentionPolicy,
+} from './version';

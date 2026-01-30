@@ -108,6 +108,41 @@ export class TooManyRequestsError extends CMSError {
   }
 }
 
+// =============================================================================
+// Version-related errors (spec 004-document-versioning)
+// =============================================================================
+
+export class VersionNotFoundError extends CMSError {
+  constructor(contentId: string, versionNumber: number) {
+    super(
+      `Version ${versionNumber} not found for content ${contentId}`,
+      'VERSION_NOT_FOUND',
+      404,
+      { contentId, versionNumber }
+    );
+    this.name = 'VersionNotFoundError';
+  }
+}
+
+export class VersionProtectedError extends CMSError {
+  constructor(versionNumber: number) {
+    super(
+      `Version ${versionNumber} is protected and cannot be deleted`,
+      'VERSION_PROTECTED',
+      403,
+      { versionNumber }
+    );
+    this.name = 'VersionProtectedError';
+  }
+}
+
+export class RollbackError extends CMSError {
+  constructor(message: string, details?: Record<string, unknown>) {
+    super(message, 'ROLLBACK_FAILED', 400, details);
+    this.name = 'RollbackError';
+  }
+}
+
 export function isCMSError(error: unknown): error is CMSError {
   return error instanceof CMSError;
 }

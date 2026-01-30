@@ -29,6 +29,9 @@ export {
   BadRequestError,
   StateTransitionError,
   TooManyRequestsError,
+  VersionNotFoundError,
+  VersionProtectedError,
+  RollbackError,
   isCMSError,
   formatErrorResponse,
 } from './errors';
@@ -116,6 +119,21 @@ export {
   handleRevokePreviewTokens,
   handleGetPreview,
 } from './api/preview';
+
+// API handlers - Version (spec 004-document-versioning)
+export type { VersionRequestContext, VersionApiResponse, RetentionRequestContext } from './api/version';
+export {
+  handleListVersions,
+  handleGetVersion,
+  handleUpdateVersion,
+  handleCompareVersions,
+  handleRollbackVersion,
+  handleAutoSave,
+  handleGetRecoverable,
+  handleListRetentionPolicies,
+  handleGetRetentionPolicy,
+  handleUpdateRetentionPolicy,
+} from './api/version';
 
 // HQL module (HOOPERITS Query Language)
 export * from './hql';
