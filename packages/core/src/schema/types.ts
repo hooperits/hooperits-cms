@@ -6,6 +6,7 @@
 export const FIELD_TYPES = [
   'text',
   'richText',
+  'portableText',
   'number',
   'boolean',
   'date',
@@ -38,12 +39,65 @@ export interface TextFieldOptions extends BaseFieldOptions {
   placeholder?: string;
 }
 
-// Rich text field options
+// Rich text field options (legacy - use PortableTextFieldOptions for new projects)
 export interface RichTextFieldOptions extends BaseFieldOptions {
   allowImages?: boolean;
   allowLinks?: boolean;
   allowLists?: boolean;
   allowHeadings?: boolean;
+}
+
+// Portable Text field options
+export interface PortableTextFieldOptions extends BaseFieldOptions {
+  /** Allowed block styles */
+  styles?: Array<'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote'>;
+  /** Allowed list types */
+  lists?: Array<'bullet' | 'number'>;
+  /** Allowed text decorators */
+  decorators?: Array<'strong' | 'em' | 'underline' | 'strike' | 'code'>;
+  /** Annotation types (links, comments, etc.) */
+  annotations?: PortableTextAnnotationConfig[];
+  /** Custom block types */
+  blocks?: PortableTextBlockConfig[];
+  /** Custom inline object types */
+  inlineObjects?: PortableTextInlineConfig[];
+  /** Maximum number of blocks */
+  maxBlocks?: number;
+  /** Minimum number of blocks (for required fields) */
+  minBlocks?: number;
+  /** Placeholder text */
+  placeholder?: string;
+}
+
+// Annotation configuration for Portable Text
+export interface PortableTextAnnotationConfig {
+  type: string;
+  title: string;
+  icon?: string;
+  fields: Record<string, FieldDefinition>;
+}
+
+// Block configuration for Portable Text
+export interface PortableTextBlockConfig {
+  type: string;
+  title: string;
+  icon?: string;
+  fields: Record<string, FieldDefinition>;
+  preview?: {
+    select: Record<string, string>;
+    prepare: (selection: Record<string, unknown>) => {
+      title: string;
+      subtitle?: string;
+    };
+  };
+}
+
+// Inline object configuration for Portable Text
+export interface PortableTextInlineConfig {
+  type: string;
+  title: string;
+  icon?: string;
+  fields: Record<string, FieldDefinition>;
 }
 
 // Number field options
@@ -116,6 +170,7 @@ export interface SelectFieldOptions extends BaseFieldOptions {
 export type FieldDefinition =
   | { type: 'text'; options: TextFieldOptions }
   | { type: 'richText'; options: RichTextFieldOptions }
+  | { type: 'portableText'; options: PortableTextFieldOptions }
   | { type: 'number'; options: NumberFieldOptions }
   | { type: 'boolean'; options: BooleanFieldOptions }
   | { type: 'date'; options: DateFieldOptions }

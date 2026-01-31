@@ -17,6 +17,42 @@ import { BooleanField } from './fields/BooleanField';
 import { DateField } from './fields/DateField';
 import { SlugField } from './fields/SlugField';
 import { SelectField } from './fields/SelectField';
+import { PortableTextField } from './fields/PortableTextField';
+import type { PortableTextContent, PortableTextFieldOptions } from '@hooperits/cms';
+
+/**
+ * Convert legacy richText (HTML string) to basic Portable Text format
+ * This allows migration from old richText fields to new portableText fields
+ */
+function migrateRichTextToPortableText(value: unknown): PortableTextContent | null {
+  // If already Portable Text format (array of blocks), return as-is
+  if (Array.isArray(value)) {
+    return value as PortableTextContent;
+  }
+
+  // If it's a string (legacy HTML/text), convert to basic Portable Text
+  if (typeof value === 'string' && value.trim()) {
+    // Split by newlines and create paragraph blocks
+    const paragraphs = value.split(/\n\n|\n/).filter((p) => p.trim());
+
+    return paragraphs.map((text, index) => ({
+      _type: 'block' as const,
+      _key: `migrated-${index}`,
+      style: 'normal' as const,
+      markDefs: [],
+      children: [
+        {
+          _type: 'span' as const,
+          _key: `migrated-span-${index}`,
+          text: text.trim(),
+          marks: [],
+        },
+      ],
+    }));
+  }
+
+  return null;
+}
 
 interface DynamicFormProps {
   contentTypeId: string;
@@ -280,6 +316,21 @@ export function DynamicForm({
             error={errors[name]}
           />
         );
+
+      case 'portableText': {
+        // Support migration from legacy richText string data to Portable Text
+        const portableTextValue = migrateRichTextToPortableText(value);
+        return (
+          <PortableTextField
+            key={name}
+            name={name}
+            options={field.options as PortableTextFieldOptions}
+            value={portableTextValue}
+            onChange={(v) => updateField(name, v)}
+            error={errors[name]}
+          />
+        );
+      }
 
       case 'image':
       case 'file':

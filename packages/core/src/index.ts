@@ -137,3 +137,6 @@ export {
 
 // HQL module (HOOPERITS Query Language)
 export * from './hql';
+
+// Portable Text module (spec 005-rich-text-portable)
+export * from './portable-text';

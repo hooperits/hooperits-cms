@@ -6,7 +6,6 @@
 import type {
   HQLQueryOptions,
   HQLQueryResponse,
-  HQLQueryMeta,
   HQLError,
 } from './types';
 
@@ -106,11 +105,11 @@ export function createHQLClient(config: HQLClientConfig): HQLClient {
  *
  * @example
  * ```typescript
- * const getPosts = defineQuery<Post[]>('*[_type == "post"]');
+ * const getPosts = defineQuery('*[_type == "post"]');
  * const posts = await client.fetch(...getPosts());
  * ```
  */
-export function defineQuery<T = unknown>(
+export function defineQuery(
   queryString: string,
   defaultParams?: Record<string, unknown>
 ): (params?: Record<string, unknown>) => [string, Record<string, unknown> | undefined] {

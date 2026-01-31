@@ -2,9 +2,15 @@
 
 /**
  * HOOPERITS CMS - Rich Text Field Component
- * Basic textarea implementation (ProseMirror integration in v2)
+ *
+ * @deprecated Use PortableTextField instead for full rich text editing support.
+ * This component is maintained for backwards compatibility only.
+ * Migration: Change field type from 'richText' to 'portableText' in your schema.
+ *
+ * Basic textarea implementation - limited functionality.
  */
 
+import { useEffect } from 'react';
 import type { RichTextFieldOptions } from '@hooperits/cms';
 
 interface RichTextFieldProps {
@@ -15,12 +21,35 @@ interface RichTextFieldProps {
   error?: string;
 }
 
+/**
+ * @deprecated Use PortableTextField for rich text editing.
+ * This component will be removed in a future version.
+ */
 export function RichTextField({ name, options, value, onChange, error }: RichTextFieldProps) {
-  // For now, handle as plain text. Full ProseMirror integration in v2
+  // Deprecation warning in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        `[HOOPERITS CMS] RichTextField is deprecated. Use PortableTextField instead.
+Field: "${name}"
+Migration: Change field type from 'richText' to 'portableText' in your content type schema.`
+      );
+    }
+  }, [name]);
+
+  // Handle as plain text. For full rich text editing, use PortableTextField.
   const textValue = typeof value === 'object' ? JSON.stringify(value) : (value || '');
 
   return (
     <div>
+      {/* Deprecation notice */}
+      <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
+        <p className="text-xs text-amber-700">
+          <strong>Deprecated:</strong> This field uses the legacy RichTextField.
+          Consider migrating to <code className="bg-amber-100 px-1 rounded">portableText</code> type for full editor support.
+        </p>
+      </div>
+
       <label htmlFor={name} className="block text-sm font-medium text-gray-700">
         {options.label}
         {options.required && <span className="text-red-500 ml-1">*</span>}
