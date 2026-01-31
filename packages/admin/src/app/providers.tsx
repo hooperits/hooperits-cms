@@ -5,7 +5,12 @@
  */
 
 import { SessionProvider } from 'next-auth/react';
+import { AdminRealtimeProvider } from '@/components/realtime';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider>
+      <AdminRealtimeProvider>{children}</AdminRealtimeProvider>
+    </SessionProvider>
+  );
 }

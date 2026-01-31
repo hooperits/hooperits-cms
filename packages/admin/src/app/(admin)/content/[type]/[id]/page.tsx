@@ -8,6 +8,7 @@ import { getContentWithState, getContentType, getSchema } from '@hooperits/cms';
 import { DynamicForm } from '@/components/forms/DynamicForm';
 import { DocumentStateIndicator } from '@/components/content/DocumentStateIndicator';
 import { PublishButton } from '@/components/content/PublishButton';
+import { DocumentEditorHeader } from '@/components/content/DocumentEditorHeader';
 
 interface Props {
   params: Promise<{ type: string; id: string }>;
@@ -29,6 +30,9 @@ export default async function ContentEditPage({ params }: Props) {
 
   return (
     <div>
+      {/* Real-time header with presence and change notifications */}
+      <DocumentEditorHeader documentId={content.id} contentType={type} />
+
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>

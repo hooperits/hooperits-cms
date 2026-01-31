@@ -10,6 +10,7 @@ import { logger } from '../logger';
 import { NotFoundError, BadRequestError } from '../errors';
 import { validateTransition, hasPendingChanges } from './states';
 import type { ContentWithState } from './state-service';
+import { emitDocumentEvent } from '../realtime/emitter';
 
 /**
  * Result of a publish operation
@@ -160,6 +161,17 @@ export async function publish(
     newStatus: 'PUBLISHED',
   });
 
+  // Emit real-time event
+  const contentType = await db.contentType.findUnique({
+    where: { id: content.typeId },
+    select: { name: true },
+  });
+  if (contentType) {
+    emitDocumentEvent('document.published', contentId, contentType.name, userId, {
+      previousStatus: content.status,
+    });
+  }
+
   return {
     content: toContentWithState(updated as ContentSelectResult),
     event: {
@@ -214,6 +226,17 @@ export async function unpublish(
     previousStatus: content.status,
     newStatus: 'UNPUBLISHED',
   });
+
+  // Emit real-time event
+  const contentType = await db.contentType.findUnique({
+    where: { id: content.typeId },
+    select: { name: true },
+  });
+  if (contentType) {
+    emitDocumentEvent('document.unpublished', contentId, contentType.name, userId, {
+      previousStatus: content.status,
+    });
+  }
 
   return {
     content: toContentWithState(updated as ContentSelectResult),
