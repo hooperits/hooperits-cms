@@ -171,7 +171,7 @@ Available functions: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `
 | 003 | Document States | Draft/published states with preview & scheduling | ✅ Implemented |
 | 004 | Document Versioning | Full history with diff, rollback & retention | ✅ Implemented |
 | 005 | Rich Text | Portable Text format for structured rich content | ✅ Implemented |
-| 006 | Real-time Sync | WebSocket sync for real-time updates | 🔲 Planned |
+| 006 | Real-time Sync | WebSocket sync for real-time updates | ✅ Implemented |
 
 #### Phase B: Admin UI Enhancement
 
@@ -435,7 +435,7 @@ Funciones disponibles: `count()`, `length()`, `lower()`, `upper()`, `defined()`,
 | 003 | Document States | Estados draft/published con preview y programación | ✅ Implementado |
 | 004 | Document Versioning | Historial completo con diff, rollback y retención | ✅ Implementado |
 | 005 | Rich Text | Formato Portable Text para contenido estructurado | ✅ Implementado |
-| 006 | Real-time Sync | Sincronización WebSocket en tiempo real | 🔲 Planificado |
+| 006 | Real-time Sync | Sincronización WebSocket en tiempo real | ✅ Implementado |
 
 #### Fase B: Mejoras de Admin UI
 
