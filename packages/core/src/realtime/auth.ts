@@ -97,7 +97,8 @@ export function createConnectionMeta(
  * Generate a unique connection ID
  */
 export function generateConnectionId(): string {
-  return `conn_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  // Use crypto.randomUUID for cryptographically secure IDs
+  return `conn_${crypto.randomUUID()}`;
 }
 
 /**

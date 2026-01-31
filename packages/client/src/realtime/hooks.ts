@@ -151,17 +151,24 @@ export function useDocumentChanges(
   documentId: string | null,
   onChanged: (event: RealtimeEvent) => void
 ): void {
+  const client = useRealtime();
   const handlerRef = useRef(onChanged);
   handlerRef.current = onChanged;
 
-  useRealtimeEvent(
-    documentId ? { documentId } : { documentId: '__never__' },
-    (event) => {
-      if (documentId && event.documentId === documentId) {
+  useEffect(() => {
+    // Early return when disabled - don't subscribe at all
+    if (!client || !documentId) {
+      return;
+    }
+
+    const unsubscribe = client.subscribe({ documentId }, (event) => {
+      if (event.documentId === documentId) {
         handlerRef.current(event);
       }
-    }
-  );
+    });
+
+    return unsubscribe;
+  }, [client, documentId]);
 }
 
 /**
@@ -171,15 +178,22 @@ export function useContentTypeChanges(
   contentType: string | null,
   onChanged: (event: RealtimeEvent) => void
 ): void {
+  const client = useRealtime();
   const handlerRef = useRef(onChanged);
   handlerRef.current = onChanged;
 
-  useRealtimeEvent(
-    contentType ? { _type: contentType } : { _type: '__never__' },
-    (event) => {
-      if (contentType && event.documentType === contentType) {
+  useEffect(() => {
+    // Early return when disabled - don't subscribe at all
+    if (!client || !contentType) {
+      return;
+    }
+
+    const unsubscribe = client.subscribe({ _type: contentType }, (event) => {
+      if (event.documentType === contentType) {
         handlerRef.current(event);
       }
-    }
-  );
+    });
+
+    return unsubscribe;
+  }, [client, contentType]);
 }

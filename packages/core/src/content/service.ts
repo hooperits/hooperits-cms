@@ -344,6 +344,11 @@ export async function updateContent(
 
 /**
  * Delete a content item
+ *
+ * @param id - The content ID to delete
+ * @param userId - Optional user ID performing the deletion.
+ *                 Required for real-time event emission.
+ *                 If not provided, no real-time event will be emitted.
  */
 export async function deleteContent(id: string, userId?: string): Promise<void> {
   const content = await db.content.findUnique({

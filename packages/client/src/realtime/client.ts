@@ -46,6 +46,7 @@ export class RealtimeClient {
   // Presence listeners
   private presenceListeners: Map<string, Set<PresenceChangeHandler>> = new Map();
   private presenceCache: Map<string, PresenceInfo[]> = new Map();
+  private presenceCacheOrder: string[] = []; // LRU order tracking
 
   // Status listeners
   private statusListeners: Set<StatusChangeHandler> = new Set();
@@ -76,15 +77,19 @@ export class RealtimeClient {
 
       this.setStatus('connecting');
 
+      // Connect without token in URL - we'll authenticate via first message
       const url = new URL(this.config.url);
-      url.searchParams.set('token', this.config.token);
 
       try {
         this.ws = new WebSocket(url.toString());
 
         this.ws.onopen = () => {
-          this.reconnectAttempts = 0;
-          this.startHeartbeat();
+          // Send authentication as first message
+          this.setStatus('authenticating');
+          this.send({
+            type: 'authenticate',
+            token: this.config.token,
+          });
         };
 
         this.ws.onmessage = (event) => {
@@ -92,12 +97,19 @@ export class RealtimeClient {
             const message = JSON.parse(event.data) as ServerMessage;
             this.handleMessage(message);
 
-            // Resolve on welcome message
-            if (message.type === 'welcome') {
+            // Resolve on authenticated message
+            if (message.type === 'authenticated') {
               this.connectionId = message.connectionId;
+              this.reconnectAttempts = 0;
               this.setStatus('connected');
+              this.startHeartbeat();
               this.resubscribeAll();
               resolve();
+            }
+
+            // Handle authentication errors
+            if (message.type === 'error' && this._status === 'authenticating') {
+              reject(new Error(message.message || 'Authentication failed'));
             }
           } catch (error) {
             console.error('[RealtimeClient] Failed to parse message:', error);
@@ -119,7 +131,7 @@ export class RealtimeClient {
 
         this.ws.onerror = (error) => {
           console.error('[RealtimeClient] WebSocket error:', error);
-          if (this._status === 'connecting') {
+          if (this._status === 'connecting' || this._status === 'authenticating') {
             reject(new Error('WebSocket connection failed'));
           }
         };
@@ -202,6 +214,19 @@ export class RealtimeClient {
     }
 
     this.send({ type: 'presence.leave' });
+  }
+
+  /**
+   * Clear presence cache for a specific document
+   */
+  clearPresenceCache(documentId?: string): void {
+    if (documentId) {
+      this.presenceCache.delete(documentId);
+      this.presenceCacheOrder = this.presenceCacheOrder.filter(id => id !== documentId);
+    } else {
+      this.presenceCache.clear();
+      this.presenceCacheOrder = [];
+    }
   }
 
   /**
@@ -294,6 +319,10 @@ export class RealtimeClient {
         break;
 
       case 'welcome':
+        // Legacy - kept for backwards compatibility
+        break;
+
+      case 'authenticated':
         // Handled in connect()
         break;
     }
@@ -312,6 +341,18 @@ export class RealtimeClient {
   }
 
   private handlePresence(documentId: string, users: PresenceInfo[]): void {
+    // Update LRU order
+    this.presenceCacheOrder = this.presenceCacheOrder.filter(id => id !== documentId);
+    this.presenceCacheOrder.push(documentId);
+
+    // Evict oldest entries if cache is full
+    while (this.presenceCacheOrder.length > this.config.maxPresenceCacheSize) {
+      const oldestId = this.presenceCacheOrder.shift();
+      if (oldestId) {
+        this.presenceCache.delete(oldestId);
+      }
+    }
+
     this.presenceCache.set(documentId, users);
 
     const listeners = this.presenceListeners.get(documentId);
@@ -361,6 +402,18 @@ export class RealtimeClient {
   }
 
   private attemptReconnect(): void {
+    // Check if we've exceeded max reconnect attempts
+    if (
+      this.config.maxReconnectAttempts > 0 &&
+      this.reconnectAttempts >= this.config.maxReconnectAttempts
+    ) {
+      console.log(
+        `[RealtimeClient] Max reconnect attempts (${this.config.maxReconnectAttempts}) reached, giving up`
+      );
+      this.setStatus('disconnected');
+      return;
+    }
+
     this.setStatus('reconnecting');
     this.reconnectAttempts++;
 
@@ -370,7 +423,7 @@ export class RealtimeClient {
     );
 
     console.log(
-      `[RealtimeClient] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`
+      `[RealtimeClient] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.config.maxReconnectAttempts || '∞'})`
     );
 
     this.reconnectTimeout = setTimeout(async () => {

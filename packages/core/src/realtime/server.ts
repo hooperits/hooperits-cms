@@ -14,12 +14,13 @@ import type {
   SubscriptionFilter,
   RealtimeServerConfig,
 } from './types';
-import { DEFAULT_CONFIG } from './types';
+import { DEFAULT_CONFIG, ClientMessageSchema } from './types';
 import {
   validateRealtimeToken,
   createConnectionMeta,
   generateConnectionId,
   shouldReceiveEvent,
+  canSubscribe,
 } from './auth';
 import { realtimeEmitter } from './emitter';
 import { presenceManager } from './presence';
@@ -30,6 +31,8 @@ import { presenceManager } from './presence';
 interface ExtendedWebSocket extends WebSocket {
   connectionMeta?: ConnectionMeta;
   isAlive?: boolean;
+  isAuthenticated?: boolean;
+  authTimeout?: NodeJS.Timeout;
 }
 
 /**
@@ -59,25 +62,13 @@ export class RealtimeServer {
     this.wss = new WebSocketServer({
       server,
       path: '/api/realtime',
-      verifyClient: async (info, callback) => {
-        // Extract token from query string
-        const url = new URL(info.req.url || '', `http://${info.req.headers.host}`);
-        const token = url.searchParams.get('token');
-
-        if (!token) {
-          callback(false, 401, 'Token required');
+      // Accept all connections - authentication happens via first message
+      verifyClient: (info, callback) => {
+        // Check max connections early
+        if (this.connections.size >= this.config.maxConnections) {
+          callback(false, 503, 'Server at capacity');
           return;
         }
-
-        const result = await validateRealtimeToken(token);
-        if (!result.valid || !result.user) {
-          callback(false, 401, result.error || 'Invalid token');
-          return;
-        }
-
-        // Store user info in request for later use
-        (info.req as IncomingMessage & { user?: typeof result.user }).user =
-          result.user;
         callback(true);
       },
     });
@@ -101,45 +92,29 @@ export class RealtimeServer {
    */
   private handleConnection(
     ws: ExtendedWebSocket,
-    req: IncomingMessage & { user?: ConnectionMeta['userId'] extends string ? { id: string; email: string; name: string; role: ConnectionMeta['role'] } : never }
+    _req: IncomingMessage
   ): void {
-    // Check max connections
-    if (this.connections.size >= this.config.maxConnections) {
-      this.sendMessage(ws, {
-        type: 'error',
-        code: 'MAX_CONNECTIONS',
-        message: 'Server at capacity',
-      });
-      ws.close(1013, 'Server at capacity');
-      return;
-    }
-
-    // Get user from verified request
-    const user = req.user;
-    if (!user) {
-      ws.close(1008, 'Authentication failed');
-      return;
-    }
-
-    // Create connection metadata
+    // Generate connection ID
     const connectionId = generateConnectionId();
-    const connectionMeta = createConnectionMeta(connectionId, user);
 
-    ws.connectionMeta = connectionMeta;
     ws.isAlive = true;
+    ws.isAuthenticated = false;
 
-    // Store connection
-    this.connections.set(connectionId, ws);
-
-    // Send welcome message
-    this.sendMessage(ws, {
-      type: 'welcome',
-      connectionId,
-    });
+    // Set authentication timeout - must authenticate within timeout period
+    ws.authTimeout = setTimeout(() => {
+      if (!ws.isAuthenticated) {
+        this.sendMessage(ws, {
+          type: 'error',
+          code: 'AUTH_TIMEOUT',
+          message: 'Authentication timeout',
+        });
+        ws.close(4001, 'Authentication timeout');
+      }
+    }, this.config.authenticationTimeout);
 
     // Set up message handling
     ws.on('message', (data) => {
-      this.handleMessage(ws, data.toString());
+      this.handleMessage(ws, connectionId, data.toString());
     });
 
     // Set up pong handling for heartbeat
@@ -149,32 +124,35 @@ export class RealtimeServer {
 
     // Handle close
     ws.on('close', () => {
-      this.handleDisconnect(connectionId);
+      if (ws.authTimeout) {
+        clearTimeout(ws.authTimeout);
+      }
+      if (ws.isAuthenticated) {
+        this.handleDisconnect(connectionId);
+      }
     });
 
     // Handle errors
     ws.on('error', (error) => {
       console.error(`[RealtimeServer] Connection error (${connectionId}):`, error);
-      this.handleDisconnect(connectionId);
+      if (ws.authTimeout) {
+        clearTimeout(ws.authTimeout);
+      }
+      if (ws.isAuthenticated) {
+        this.handleDisconnect(connectionId);
+      }
     });
 
-    console.log(
-      `[RealtimeServer] Client connected: ${connectionId} (user: ${user.name})`
-    );
+    console.log(`[RealtimeServer] Client pending authentication: ${connectionId}`);
   }
 
   /**
    * Handle incoming message from client
    */
-  private handleMessage(ws: ExtendedWebSocket, data: string): void {
-    const meta = ws.connectionMeta;
-    if (!meta) {
-      return;
-    }
-
-    let message: ClientMessage;
+  private handleMessage(ws: ExtendedWebSocket, connectionId: string, data: string): void {
+    let rawMessage: unknown;
     try {
-      message = JSON.parse(data) as ClientMessage;
+      rawMessage = JSON.parse(data);
     } catch {
       this.sendMessage(ws, {
         type: 'error',
@@ -184,7 +162,49 @@ export class RealtimeServer {
       return;
     }
 
+    // Validate message with Zod schema
+    const parseResult = ClientMessageSchema.safeParse(rawMessage);
+    if (!parseResult.success) {
+      this.sendMessage(ws, {
+        type: 'error',
+        code: 'INVALID_MESSAGE',
+        message: `Invalid message: ${parseResult.error.issues[0]?.message || 'validation failed'}`,
+      });
+      return;
+    }
+
+    const message = parseResult.data;
+
+    // Handle authentication first (before any other messages)
+    if (!ws.isAuthenticated) {
+      if (message.type !== 'authenticate') {
+        this.sendMessage(ws, {
+          type: 'error',
+          code: 'NOT_AUTHENTICATED',
+          message: 'Must authenticate first',
+        });
+        return;
+      }
+
+      this.handleAuthenticate(ws, connectionId, message.token);
+      return;
+    }
+
+    const meta = ws.connectionMeta;
+    if (!meta) {
+      return;
+    }
+
     switch (message.type) {
+      case 'authenticate':
+        // Already authenticated
+        this.sendMessage(ws, {
+          type: 'error',
+          code: 'ALREADY_AUTHENTICATED',
+          message: 'Already authenticated',
+        });
+        break;
+
       case 'subscribe':
         this.handleSubscribe(ws, meta, message.subscriptionId, message.filter);
         break;
@@ -205,13 +225,60 @@ export class RealtimeServer {
         this.sendMessage(ws, { type: 'pong' });
         break;
 
-      default:
+      default: {
+        const exhaustiveCheck: never = message;
         this.sendMessage(ws, {
           type: 'error',
           code: 'UNKNOWN_MESSAGE',
-          message: `Unknown message type`,
+          message: `Unknown message type: ${(exhaustiveCheck as { type?: string }).type}`,
         });
+      }
     }
+  }
+
+  /**
+   * Handle authentication message
+   */
+  private async handleAuthenticate(
+    ws: ExtendedWebSocket,
+    connectionId: string,
+    token: string
+  ): Promise<void> {
+    const result = await validateRealtimeToken(token);
+
+    if (!result.valid || !result.user) {
+      this.sendMessage(ws, {
+        type: 'error',
+        code: 'AUTH_FAILED',
+        message: result.error || 'Authentication failed',
+      });
+      ws.close(4002, 'Authentication failed');
+      return;
+    }
+
+    // Clear auth timeout
+    if (ws.authTimeout) {
+      clearTimeout(ws.authTimeout);
+      ws.authTimeout = undefined;
+    }
+
+    // Create connection metadata
+    const connectionMeta = createConnectionMeta(connectionId, result.user);
+    ws.connectionMeta = connectionMeta;
+    ws.isAuthenticated = true;
+
+    // Store connection
+    this.connections.set(connectionId, ws);
+
+    // Send authenticated message
+    this.sendMessage(ws, {
+      type: 'authenticated',
+      connectionId,
+    });
+
+    console.log(
+      `[RealtimeServer] Client authenticated: ${connectionId} (user: ${result.user.name})`
+    );
   }
 
   /**
@@ -223,6 +290,26 @@ export class RealtimeServer {
     subscriptionId: string,
     filter: SubscriptionFilter
   ): void {
+    // Rate limiting: check max subscriptions per connection
+    if (meta.subscriptions.size >= this.config.maxSubscriptionsPerConnection) {
+      this.sendMessage(ws, {
+        type: 'error',
+        code: 'SUBSCRIPTION_LIMIT',
+        message: `Maximum subscriptions (${this.config.maxSubscriptionsPerConnection}) reached`,
+      });
+      return;
+    }
+
+    // Check permissions based on role
+    if (!canSubscribe(meta.role, filter)) {
+      this.sendMessage(ws, {
+        type: 'error',
+        code: 'SUBSCRIPTION_FORBIDDEN',
+        message: 'Not allowed to subscribe to this filter',
+      });
+      return;
+    }
+
     meta.subscriptions.set(subscriptionId, filter);
 
     this.sendMessage(ws, {

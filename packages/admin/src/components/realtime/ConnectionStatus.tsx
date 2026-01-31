@@ -32,6 +32,12 @@ const STATUS_CONFIG: Record<
     label: 'Connecting...',
     icon: '○',
   },
+  authenticating: {
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-500',
+    label: 'Authenticating...',
+    icon: '◑',
+  },
   reconnecting: {
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-500',
@@ -67,7 +73,7 @@ export function ConnectionStatus({
       {/* Status dot */}
       <span
         className={`inline-block w-2 h-2 rounded-full ${config.bgColor} ${
-          status === 'reconnecting' || status === 'connecting'
+          status === 'reconnecting' || status === 'connecting' || status === 'authenticating'
             ? 'animate-pulse'
             : ''
         }`}
@@ -108,7 +114,7 @@ export function ConnectionStatusBadge({ className = '' }: { className?: string }
     >
       <span
         className={`inline-block w-2 h-2 rounded-full ${config.bgColor} ${
-          status === 'reconnecting' || status === 'connecting'
+          status === 'reconnecting' || status === 'connecting' || status === 'authenticating'
             ? 'animate-pulse'
             : ''
         }`}

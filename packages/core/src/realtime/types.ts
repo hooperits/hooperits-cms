@@ -3,6 +3,7 @@
  * TypeScript interfaces for WebSocket communication
  */
 
+import { z } from 'zod';
 import type { UserRole } from '../auth/permissions';
 
 /**
@@ -95,6 +96,7 @@ export interface ConnectionMeta {
  */
 export type ConnectionStatus =
   | 'connecting'
+  | 'authenticating'
   | 'connected'
   | 'reconnecting'
   | 'disconnected';
@@ -133,7 +135,76 @@ export type ClientMessage =
   | UnsubscribeMessage
   | PresenceUpdateMessage
   | PresenceLeaveMessage
-  | PingMessage;
+  | PingMessage
+  | AuthenticateMessage;
+
+/**
+ * Authentication message (sent as first message after connection)
+ */
+export interface AuthenticateMessage {
+  type: 'authenticate';
+  token: string;
+}
+
+// ============================================
+// Zod Validation Schemas for Client Messages
+// ============================================
+
+const RealtimeEventTypeSchema = z.enum([
+  'document.created',
+  'document.updated',
+  'document.deleted',
+  'document.published',
+  'document.unpublished',
+  'presence.joined',
+  'presence.left',
+  'presence.updated',
+]);
+
+export const SubscriptionFilterSchema = z.object({
+  _type: z.string().max(100).optional(),
+  documentId: z.string().max(100).optional(),
+  events: z.array(RealtimeEventTypeSchema).max(10).optional(),
+}).strict();
+
+export const SubscribeMessageSchema = z.object({
+  type: z.literal('subscribe'),
+  subscriptionId: z.string().min(1).max(100),
+  filter: SubscriptionFilterSchema,
+}).strict();
+
+export const UnsubscribeMessageSchema = z.object({
+  type: z.literal('unsubscribe'),
+  subscriptionId: z.string().min(1).max(100),
+}).strict();
+
+export const PresenceUpdateMessageSchema = z.object({
+  type: z.literal('presence.update'),
+  documentId: z.string().min(1).max(100),
+  field: z.string().max(100).optional(),
+}).strict();
+
+export const PresenceLeaveMessageSchema = z.object({
+  type: z.literal('presence.leave'),
+}).strict();
+
+export const PingMessageSchema = z.object({
+  type: z.literal('ping'),
+}).strict();
+
+export const AuthenticateMessageSchema = z.object({
+  type: z.literal('authenticate'),
+  token: z.string().min(1).max(10000),
+}).strict();
+
+export const ClientMessageSchema = z.discriminatedUnion('type', [
+  SubscribeMessageSchema,
+  UnsubscribeMessageSchema,
+  PresenceUpdateMessageSchema,
+  PresenceLeaveMessageSchema,
+  PingMessageSchema,
+  AuthenticateMessageSchema,
+]);
 
 // ============================================
 // Server -> Client Messages
@@ -175,6 +246,11 @@ export interface WelcomeMessage {
   connectionId: string;
 }
 
+export interface AuthenticatedMessage {
+  type: 'authenticated';
+  connectionId: string;
+}
+
 export type ServerMessage =
   | EventMessage
   | PresenceMessage
@@ -182,7 +258,8 @@ export type ServerMessage =
   | UnsubscribedMessage
   | ErrorMessage
   | PongMessage
-  | WelcomeMessage;
+  | WelcomeMessage
+  | AuthenticatedMessage;
 
 // ============================================
 // Configuration
@@ -200,6 +277,10 @@ export interface RealtimeServerConfig {
   connectionTimeout: number;
   /** Maximum connections per server (default: 500) */
   maxConnections: number;
+  /** Maximum subscriptions per connection (default: 50) */
+  maxSubscriptionsPerConnection: number;
+  /** Authentication timeout in ms (default: 5000) */
+  authenticationTimeout: number;
 }
 
 /**
@@ -216,6 +297,8 @@ export interface RealtimeClientConfig {
   reconnectDelay?: number;
   /** Maximum reconnect delay in ms (default: 30000) */
   reconnectDelayMax?: number;
+  /** Maximum reconnect attempts before giving up (default: 10, 0 = infinite) */
+  maxReconnectAttempts?: number;
   /** Heartbeat interval in ms (default: 30000) */
   heartbeatInterval?: number;
 }
@@ -228,12 +311,15 @@ export const DEFAULT_CONFIG: RealtimeServerConfig = {
   heartbeatInterval: 30000,
   connectionTimeout: 60000,
   maxConnections: 500,
+  maxSubscriptionsPerConnection: 50,
+  authenticationTimeout: 5000,
 };
 
 export const DEFAULT_CLIENT_CONFIG = {
   reconnect: true,
   reconnectDelay: 1000,
   reconnectDelayMax: 30000,
+  maxReconnectAttempts: 10,
   heartbeatInterval: 30000,
 };
 

@@ -55,6 +55,7 @@ export interface SubscriptionFilter {
  */
 export type ConnectionStatus =
   | 'connecting'
+  | 'authenticating'
   | 'connected'
   | 'reconnecting'
   | 'disconnected';
@@ -68,6 +69,10 @@ export interface RealtimeClientConfig {
   reconnect?: boolean;
   reconnectDelay?: number;
   reconnectDelayMax?: number;
+  /** Maximum reconnect attempts before giving up (default: 10, 0 = infinite) */
+  maxReconnectAttempts?: number;
+  /** Maximum entries in presence cache (default: 20) */
+  maxPresenceCacheSize?: number;
   heartbeatInterval?: number;
 }
 
@@ -78,6 +83,8 @@ export const DEFAULT_CLIENT_CONFIG = {
   reconnect: true,
   reconnectDelay: 1000,
   reconnectDelayMax: 30000,
+  maxReconnectAttempts: 10,
+  maxPresenceCacheSize: 20,
   heartbeatInterval: 30000,
 };
 
@@ -107,12 +114,18 @@ export interface PingMessage {
   type: 'ping';
 }
 
+export interface AuthenticateMessage {
+  type: 'authenticate';
+  token: string;
+}
+
 export type ClientMessage =
   | SubscribeMessage
   | UnsubscribeMessage
   | PresenceUpdateMessage
   | PresenceLeaveMessage
-  | PingMessage;
+  | PingMessage
+  | AuthenticateMessage;
 
 // Message types (server -> client)
 export interface EventMessage {
@@ -151,6 +164,11 @@ export interface WelcomeMessage {
   connectionId: string;
 }
 
+export interface AuthenticatedMessage {
+  type: 'authenticated';
+  connectionId: string;
+}
+
 export type ServerMessage =
   | EventMessage
   | PresenceMessage
@@ -158,7 +176,8 @@ export type ServerMessage =
   | UnsubscribedMessage
   | ErrorMessage
   | PongMessage
-  | WelcomeMessage;
+  | WelcomeMessage
+  | AuthenticatedMessage;
 
 /**
  * Handler types
