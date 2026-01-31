@@ -11,7 +11,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@hooperits/cms": ["../core/src/index.ts"],
-      "@hooperits/cms/*": ["../core/src/*"]
+      "@hooperits/cms/*": ["../core/src/*"],
+      "@hooperits/client": ["../client/src/index.ts"],
+      "@hooperits/client/*": ["../client/src/*"]
     }
   },
   "include": ["src/**/*", "next-env.d.ts", ".next/types/**/*.ts"],

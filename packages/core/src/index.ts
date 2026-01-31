@@ -140,3 +140,6 @@ export * from './hql';
 
 // Portable Text module (spec 005-rich-text-portable)
 export * from './portable-text';
+
+// Real-time Sync module (spec 006-real-time-sync)
+export * from './realtime';

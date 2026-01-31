@@ -5,6 +5,7 @@
  */
 
 import { signOut, useSession } from 'next-auth/react';
+import { ConnectionStatus } from '@/components/realtime';
 
 export function Header() {
   const { data: session } = useSession();
@@ -17,6 +18,9 @@ export function Header() {
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Real-time connection status */}
+          <ConnectionStatus />
+
           {session?.user && (
             <>
               <span className="text-sm text-gray-600">

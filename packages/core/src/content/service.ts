@@ -9,6 +9,7 @@ import { NotFoundError, ValidationError } from '../errors';
 import { getSchema, validateContent } from '../schema';
 import type { DocumentStatus, Prisma } from '@prisma/client';
 import { createVersionOnUpdate } from './version';
+import { emitDocumentEvent } from '../realtime/emitter';
 
 export interface ContentInput {
   data: Record<string, unknown>;
@@ -252,6 +253,12 @@ export async function createContent(
   const cache = getCache();
   cache.invalidateByTag(`type:${contentType.id}`);
 
+  // Emit real-time event
+  emitDocumentEvent('document.created', content.id, typeName, userId, {
+    slug: content.slug,
+    status: content.status,
+  });
+
   return content as unknown as Content;
 }
 
@@ -325,15 +332,28 @@ export async function updateContent(
   cache.invalidateByTag(`content:${id}`);
   cache.invalidateByTag(`type:${existing.typeId}`);
 
+  // Emit real-time event
+  emitDocumentEvent('document.updated', id, existing.type.name, userId, {
+    slug: content.slug,
+    status: content.status,
+    changedFields: input.data ? Object.keys(input.data) : [],
+  });
+
   return content as unknown as Content;
 }
 
 /**
  * Delete a content item
+ *
+ * @param id - The content ID to delete
+ * @param userId - Optional user ID performing the deletion.
+ *                 Required for real-time event emission.
+ *                 If not provided, no real-time event will be emitted.
  */
-export async function deleteContent(id: string): Promise<void> {
+export async function deleteContent(id: string, userId?: string): Promise<void> {
   const content = await db.content.findUnique({
     where: { id },
+    include: { type: { select: { name: true } } },
   });
 
   if (!content) {
@@ -348,6 +368,13 @@ export async function deleteContent(id: string): Promise<void> {
   const cache = getCache();
   cache.invalidateByTag(`content:${id}`);
   cache.invalidateByTag(`type:${content.typeId}`);
+
+  // Emit real-time event
+  if (userId) {
+    emitDocumentEvent('document.deleted', id, content.type.name, userId, {
+      slug: content.slug,
+    });
+  }
 }
 
 /**

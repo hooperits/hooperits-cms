@@ -86,3 +86,34 @@ export type {
   AutoSaveState,
   RecoverableData,
 } from './auto-save';
+
+// Real-time Sync (spec 006-real-time-sync)
+export {
+  RealtimeClient,
+  createRealtimeClient,
+  RealtimeProvider,
+  RealtimeContext,
+  useRealtimeContext,
+  useRealtime,
+  useRealtimeStatus,
+  useRealtimeEvent,
+  useDocumentPresence,
+  useSetPresence,
+  useDocumentEdit,
+  useDocumentChanges,
+  useContentTypeChanges,
+  DEFAULT_CLIENT_CONFIG,
+} from './realtime';
+export type {
+  RealtimeEventType,
+  RealtimeEvent,
+  PresenceInfo,
+  SubscriptionFilter,
+  ConnectionStatus,
+  RealtimeClientConfig,
+  RealtimeContextValue,
+  RealtimeProviderProps,
+  RealtimeEventHandler,
+  PresenceChangeHandler,
+  StatusChangeHandler,
+} from './realtime';
