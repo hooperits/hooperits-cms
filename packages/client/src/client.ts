@@ -10,7 +10,6 @@ import type {
   ContentType,
   ListOptions,
   ClientConfig,
-  CMSError,
   HQLQueryOptions,
   HQLQueryResponse,
 } from './types';

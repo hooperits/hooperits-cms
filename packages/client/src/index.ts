@@ -46,6 +46,32 @@ export type { PreviewContentData, PreviewState } from './preview';
 // Components
 export { PreviewBanner } from './components/PreviewBanner';
 
+// Portable Text Component (spec 005-rich-text-portable)
+export { PortableText, defaultComponents } from './components/PortableText';
+export {
+  DefaultParagraph,
+  DefaultHeading1,
+  DefaultHeading2,
+  DefaultHeading3,
+  DefaultHeading4,
+  DefaultHeading5,
+  DefaultHeading6,
+  DefaultBlockquote,
+  DefaultStrong,
+  DefaultEm,
+  DefaultUnderline,
+  DefaultStrike,
+  DefaultCode,
+  DefaultLink,
+  DefaultBulletList,
+  DefaultNumberedList,
+  DefaultListItem,
+  DefaultImageBlock,
+  DefaultCodeBlock,
+  DefaultVideoBlock,
+  DefaultQuoteBlock,
+} from './components/PortableText';
+
 // Auto-save (spec 004-document-versioning)
 export {
   useAutoSave,

@@ -42,6 +42,7 @@ HOOPERITS CMS is a headless content management system designed for developers wh
 | Image optimization | ✅ Implemented | Automatic image optimization with Sharp |
 | RBAC Authentication | ✅ Implemented | Role-based access control (Admin/Editor/Viewer) |
 | CLI Tools | ✅ Implemented | Init, migrate, generate, create-admin commands |
+| Rich Text Editor | ✅ Implemented | Portable Text format for structured rich content |
 
 **Legend**: ✅ Implemented | 🚧 In Progress | 🔲 Planned
 
@@ -169,7 +170,7 @@ Available functions: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspired by GROQ | ✅ Implemented |
 | 003 | Document States | Draft/published states with preview & scheduling | ✅ Implemented |
 | 004 | Document Versioning | Full history with diff, rollback & retention | ✅ Implemented |
-| 005 | Rich Text | Portable Text format for structured rich content | 🔲 Planned |
+| 005 | Rich Text | Portable Text format for structured rich content | ✅ Implemented |
 | 006 | Real-time Sync | WebSocket sync for real-time updates | 🔲 Planned |
 
 #### Phase B: Admin UI Enhancement
@@ -305,6 +306,7 @@ HOOPERITS CMS es un sistema de gestión de contenido headless diseñado para des
 | Image optimization | ✅ Implementado | Optimización automática con Sharp |
 | Autenticación RBAC | ✅ Implementado | Control de acceso por roles (Admin/Editor/Viewer) |
 | CLI Tools | ✅ Implementado | Comandos init, migrate, generate, create-admin |
+| Rich Text Editor | ✅ Implementado | Formato Portable Text para contenido estructurado |
 
 **Leyenda**: ✅ Implementado | 🚧 En Progreso | 🔲 Planificado
 
@@ -432,7 +434,7 @@ Funciones disponibles: `count()`, `length()`, `lower()`, `upper()`, `defined()`,
 | 002 | Query Language | HQL (HOOPERITS Query Language) inspirado en GROQ | ✅ Implementado |
 | 003 | Document States | Estados draft/published con preview y programación | ✅ Implementado |
 | 004 | Document Versioning | Historial completo con diff, rollback y retención | ✅ Implementado |
-| 005 | Rich Text | Formato Portable Text para contenido estructurado | 🔲 Planificado |
+| 005 | Rich Text | Formato Portable Text para contenido estructurado | ✅ Implementado |
 | 006 | Real-time Sync | Sincronización WebSocket en tiempo real | 🔲 Planificado |
 
 #### Fase B: Mejoras de Admin UI

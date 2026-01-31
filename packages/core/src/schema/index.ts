@@ -19,6 +19,10 @@ export type {
   ReferenceFieldOptions,
   ArrayFieldOptions,
   SelectFieldOptions,
+  PortableTextFieldOptions,
+  PortableTextAnnotationConfig,
+  PortableTextBlockConfig,
+  PortableTextInlineConfig,
   FieldDefinition,
   SchemaDefinition,
   ContentTypeRecord,
@@ -42,6 +46,7 @@ export {
   reference,
   array,
   select,
+  portableText,
 } from './fields';
 
 // Schema definition

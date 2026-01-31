@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "preserve",
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
@@ -9,7 +10,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@hooperits/cms": ["../core/src"]
+      "@hooperits/cms": ["../core/src/index.ts"],
+      "@hooperits/cms/*": ["../core/src/*"]
     }
   },
   "include": ["src/**/*", "next-env.d.ts", ".next/types/**/*.ts"],

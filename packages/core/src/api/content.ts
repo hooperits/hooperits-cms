@@ -19,6 +19,8 @@ import {
 import { ValidationError, formatErrorResponse } from '../errors';
 import type { UserRole } from '../auth/permissions';
 import { hasPermission } from '../auth/permissions';
+import { validatePortableText } from '../portable-text/validation';
+import type { PortableTextContent } from '../portable-text/types';
 
 export interface RequestContext {
   user: {
@@ -28,6 +30,33 @@ export interface RequestContext {
   params: Record<string, string>;
   query: Record<string, string | string[] | undefined>;
   body: unknown;
+}
+
+/**
+ * Validate Portable Text fields in content data
+ * Checks if any field looks like Portable Text content and validates it
+ */
+function validatePortableTextFields(
+  data: Record<string, unknown>
+): { field: string; message: string }[] {
+  const errors: { field: string; message: string }[] = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    // Check if value looks like Portable Text (array of blocks with _type)
+    if (Array.isArray(value) && value.length > 0 && value[0]?._type) {
+      const result = validatePortableText(value as PortableTextContent);
+      if (!result.valid) {
+        for (const error of result.errors) {
+          errors.push({
+            field: error.path ? `data.${key}.${error.path}` : `data.${key}`,
+            message: error.message,
+          });
+        }
+      }
+    }
+  }
+
+  return errors;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -155,6 +184,16 @@ export async function handleCreateContent(ctx: RequestContext): Promise<ApiRespo
       );
     }
 
+    // Validate Portable Text fields in content data
+    if (inputResult.data.data && typeof inputResult.data.data === 'object') {
+      const ptErrors = validatePortableTextFields(
+        inputResult.data.data as Record<string, unknown>
+      );
+      if (ptErrors.length > 0) {
+        throw new ValidationError(ptErrors);
+      }
+    }
+
     const content = await createContent(type, inputResult.data, ctx.user.id);
 
     return {
@@ -191,6 +230,16 @@ export async function handleUpdateContent(ctx: RequestContext): Promise<ApiRespo
           message: e.message,
         }))
       );
+    }
+
+    // Validate Portable Text fields in content data
+    if (inputResult.data.data && typeof inputResult.data.data === 'object') {
+      const ptErrors = validatePortableTextFields(
+        inputResult.data.data as Record<string, unknown>
+      );
+      if (ptErrors.length > 0) {
+        throw new ValidationError(ptErrors);
+      }
     }
 
     const content = await updateContent(id, inputResult.data, ctx.user.id);

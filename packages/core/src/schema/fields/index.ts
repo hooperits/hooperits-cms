@@ -5,6 +5,7 @@
 
 export { text } from './text';
 export { richText } from './richText';
+export { portableText } from './portableText';
 export { number } from './number';
 export { boolean } from './boolean';
 export { date, datetime } from './date';
@@ -18,6 +19,7 @@ export { select } from './select';
 // Re-export all fields as a single object for convenience
 import { text } from './text';
 import { richText } from './richText';
+import { portableText } from './portableText';
 import { number } from './number';
 import { boolean } from './boolean';
 import { date, datetime } from './date';
@@ -31,6 +33,7 @@ import { select } from './select';
 export const fields = {
   text,
   richText,
+  portableText,
   number,
   boolean,
   date,

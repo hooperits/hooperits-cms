@@ -1,0 +1,204 @@
+/**
+ * HOOPERITS CMS - Portable Text Editor Styles
+ */
+
+.portable-text-editor .ProseMirror {
+  min-height: 200px;
+  padding: 1rem;
+}
+
+.portable-text-editor .ProseMirror:focus {
+  outline: none;
+}
+
+.portable-text-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+.portable-text-editor .ProseMirror h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.portable-text-editor .ProseMirror h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.portable-text-editor .ProseMirror h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.portable-text-editor .ProseMirror h4,
+.portable-text-editor .ProseMirror h5,
+.portable-text-editor .ProseMirror h6 {
+  font-size: 1em;
+  font-weight: 600;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.portable-text-editor .ProseMirror ul,
+.portable-text-editor .ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.portable-text-editor .ProseMirror ul {
+  list-style-type: disc;
+}
+
+.portable-text-editor .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.portable-text-editor .ProseMirror li {
+  margin: 0.25em 0;
+}
+
+.portable-text-editor .ProseMirror blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.portable-text-editor .ProseMirror code {
+  background-color: #f3f4f6;
+  padding: 0.125em 0.25em;
+  border-radius: 0.25em;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875em;
+}
+
+.portable-text-editor .ProseMirror a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.portable-text-editor .ProseMirror a:hover {
+  color: #1d4ed8;
+}
+
+.portable-text-editor .ProseMirror p {
+  margin: 0.5em 0;
+}
+
+/* =============================================================================
+ * Annotation Styles
+ * ============================================================================= */
+
+/* Comment annotation */
+.portable-text-editor .ProseMirror .annotation-comment {
+  position: relative;
+  background-color: rgba(253, 224, 71, 0.4);
+  border-bottom: 2px solid #facc15;
+  cursor: pointer;
+}
+
+.portable-text-editor .ProseMirror .annotation-comment:hover {
+  background-color: rgba(253, 224, 71, 0.6);
+}
+
+.portable-text-editor .ProseMirror .annotation-comment[data-resolved="true"] {
+  background-color: rgba(134, 239, 172, 0.3);
+  border-bottom-color: #86efac;
+}
+
+.portable-text-editor .ProseMirror .annotation-comment::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 6px;
+  height: 6px;
+  background-color: #eab308;
+  border-radius: 50%;
+}
+
+.portable-text-editor .ProseMirror .annotation-comment[data-resolved="true"]::after {
+  background-color: #22c55e;
+}
+
+/* Highlight annotation - color variations */
+.portable-text-editor .ProseMirror .annotation-highlight {
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.portable-text-editor .ProseMirror .annotation-highlight[data-color="yellow"] {
+  background-color: rgba(253, 224, 71, 0.5);
+}
+
+.portable-text-editor .ProseMirror .annotation-highlight[data-color="green"] {
+  background-color: rgba(134, 239, 172, 0.5);
+}
+
+.portable-text-editor .ProseMirror .annotation-highlight[data-color="blue"] {
+  background-color: rgba(147, 197, 253, 0.5);
+}
+
+.portable-text-editor .ProseMirror .annotation-highlight[data-color="pink"] {
+  background-color: rgba(249, 168, 212, 0.5);
+}
+
+.portable-text-editor .ProseMirror .annotation-highlight[data-color="purple"] {
+  background-color: rgba(216, 180, 254, 0.5);
+}
+
+.portable-text-editor .ProseMirror .annotation-highlight[data-color="orange"] {
+  background-color: rgba(253, 186, 116, 0.5);
+}
+
+/* Internal link annotation */
+.portable-text-editor .ProseMirror .annotation-internal-link {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+}
+
+.portable-text-editor .ProseMirror .annotation-internal-link:hover {
+  color: #1d4ed8;
+  text-decoration-style: solid;
+}
+
+/* Overlapping annotations */
+.portable-text-editor .ProseMirror .annotation-overlap {
+  border: 1px dashed #9ca3af;
+  border-radius: 2px;
+}
+
+/* Inline objects */
+.portable-text-editor .ProseMirror .inline-mention {
+  display: inline;
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-weight: 500;
+}
+
+.portable-text-editor .ProseMirror .inline-variable {
+  display: inline;
+  background-color: #f3e8ff;
+  color: #7c3aed;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875em;
+}
