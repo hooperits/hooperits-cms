@@ -48,3 +48,6 @@ prisma/*.db-journal
 specs/
 CLAUDE.md
 .playwright-mcp/
+
+# Turborepo cache
+.turbo/
