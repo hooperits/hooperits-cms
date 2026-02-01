@@ -2,9 +2,12 @@
 
 /**
  * HOOPERITS CMS - Select Field Component
+ * Supports static and dynamic options (Spec 007)
  */
 
+import { useCallback } from 'react';
 import type { SelectFieldOptions } from '@hooperits/cms';
+import { useDynamicOptions } from '../hooks/useDynamicOptions';
 
 interface SelectFieldProps {
   name: string;
@@ -12,10 +15,41 @@ interface SelectFieldProps {
   value: string | string[];
   onChange: (value: string | string[]) => void;
   error?: string;
+  /** Document data for dynamic options (Spec 007) */
+  documentData?: Record<string, unknown>;
 }
 
-export function SelectField({ name, options, value, onChange, error }: SelectFieldProps) {
+export function SelectField({
+  name,
+  options,
+  value,
+  onChange,
+  error,
+  documentData = {},
+}: SelectFieldProps) {
   const isMultiple = options.multiple ?? false;
+
+  // Handle clearing value when parent field changes
+  const handleClearValue = useCallback(() => {
+    onChange(isMultiple ? [] : '');
+  }, [isMultiple, onChange]);
+
+  // Use dynamic options hook
+  const {
+    options: displayOptions,
+    isLoading,
+    error: loadError,
+    isValueValid,
+  } = useDynamicOptions({
+    dependency: options.dependsOn,
+    data: documentData,
+    currentValue: value as string | string[] | undefined,
+    staticOptions: options.options,
+    onClearValue: handleClearValue,
+  });
+
+  // Combine errors
+  const displayError = error || loadError || (!isValueValid ? 'Selected value is no longer valid' : undefined);
 
   return (
     <div>
@@ -26,35 +60,46 @@ export function SelectField({ name, options, value, onChange, error }: SelectFie
       {options.description && (
         <p className="mt-1 text-sm text-gray-500">{options.description}</p>
       )}
-      <select
-        id={name}
-        name={name}
-        value={value}
-        onChange={(e) => {
-          if (isMultiple) {
-            const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
-            onChange(selected);
-          } else {
-            onChange(e.target.value);
-          }
-        }}
-        multiple={isMultiple}
-        required={options.required}
-        disabled={options.readOnly}
-        className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-          error ? 'border-red-300' : 'border-gray-300'
-        } ${options.readOnly ? 'bg-gray-100' : ''}`}
-      >
-        {!isMultiple && !options.required && (
-          <option value="">Select an option...</option>
+
+      <div className="relative">
+        <select
+          id={name}
+          name={name}
+          value={value}
+          onChange={(e) => {
+            if (isMultiple) {
+              const selected = Array.from(e.target.selectedOptions, (opt) => opt.value);
+              onChange(selected);
+            } else {
+              onChange(e.target.value);
+            }
+          }}
+          multiple={isMultiple}
+          required={options.required}
+          disabled={options.readOnly || isLoading}
+          className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+            displayError ? 'border-red-300' : 'border-gray-300'
+          } ${options.readOnly || isLoading ? 'bg-gray-100' : ''}`}
+        >
+          {!isMultiple && !options.required && (
+            <option value="">{isLoading ? 'Loading...' : 'Select an option...'}</option>
+          )}
+          {displayOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+            <span className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-blue-600 rounded-full inline-block" />
+          </div>
         )}
-        {options.options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      </div>
+
+      {displayError && <p className="mt-1 text-sm text-red-600">{displayError}</p>}
     </div>
   );
 }

@@ -5,11 +5,11 @@
  * Renders form fields based on schema definition with auto-save
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAutoSave, checkAllRecovery, type RecoverableData } from '@hooperits/client';
 import { RecoveryPrompt } from '@/components/versioning';
-import type { FieldDefinition, SlugFieldOptions } from '@hooperits/cms';
+import type { FieldDefinition, SlugFieldOptions, SchemaDefinition } from '@hooperits/cms';
 import { TextField } from './fields/TextField';
 import { RichTextField } from './fields/RichTextField';
 import { NumberField } from './fields/NumberField';
@@ -18,6 +18,11 @@ import { DateField } from './fields/DateField';
 import { SlugField } from './fields/SlugField';
 import { SelectField } from './fields/SelectField';
 import { PortableTextField } from './fields/PortableTextField';
+import { ConditionalFieldWrapper } from './ConditionalFieldWrapper';
+import { HiddenFieldCleanupDialog } from './HiddenFieldCleanupDialog';
+import { FieldGroupsRenderer } from './FieldGroupsRenderer';
+import { useFieldVisibility } from './hooks/useFieldVisibility';
+import { useCrossFieldValidation } from './hooks/useCrossFieldValidation';
 import type { PortableTextContent, PortableTextFieldOptions } from '@hooperits/cms';
 
 /**
@@ -58,6 +63,8 @@ interface DynamicFormProps {
   contentTypeId: string;
   contentTypeName: string;
   schema: Record<string, FieldDefinition>;
+  /** Full schema definition with groups, layout, validation (Spec 007) */
+  schemaDefinition?: SchemaDefinition;
   initialData: Record<string, unknown>;
   contentId?: string;
   initialStatus?: 'DRAFT' | 'PUBLISHED';
@@ -67,6 +74,7 @@ interface DynamicFormProps {
 export function DynamicForm({
   contentTypeName,
   schema,
+  schemaDefinition,
   initialData,
   contentId,
   initialStatus = 'DRAFT',
@@ -84,6 +92,99 @@ export function DynamicForm({
   // Auto-save state
   const [recoverable, setRecoverable] = useState<RecoverableData | null>(null);
   const [showRecovery, setShowRecovery] = useState(false);
+
+  // Hidden field cleanup state (Spec 007)
+  const [showCleanupDialog, setShowCleanupDialog] = useState(false);
+  const [pendingCleanupFields, setPendingCleanupFields] = useState<string[]>([]);
+
+  // Build a minimal SchemaDefinition for visibility evaluation if not provided
+  const effectiveSchema = useMemo((): SchemaDefinition => {
+    if (schemaDefinition) {
+      return schemaDefinition;
+    }
+    // Create a minimal schema from the fields
+    return {
+      name: contentTypeName,
+      label: contentTypeName,
+      labelPlural: contentTypeName,
+      fields: schema,
+    };
+  }, [schemaDefinition, schema, contentTypeName]);
+
+  // Field visibility hook (Spec 007)
+  const {
+    isFieldHidden,
+    fieldsNeedingCleanup,
+    clearCleanupQueue,
+  } = useFieldVisibility({
+    schema: effectiveSchema,
+    data,
+    onFieldsNeedCleanup: (fields) => {
+      if (fields.length > 0) {
+        setPendingCleanupFields(fields);
+        setShowCleanupDialog(true);
+      }
+    },
+  });
+
+  // Get field labels for cleanup dialog
+  const fieldLabels = useMemo(() => {
+    const labels: Record<string, string> = {};
+    for (const [name, field] of Object.entries(schema)) {
+      labels[name] = field.options.label;
+    }
+    return labels;
+  }, [schema]);
+
+  // Handle keeping hidden field values
+  const handleKeepHiddenValues = useCallback(() => {
+    clearCleanupQueue();
+    setPendingCleanupFields([]);
+  }, [clearCleanupQueue]);
+
+  // Handle clearing hidden field values
+  const handleClearHiddenValues = useCallback(() => {
+    setData((prev) => {
+      const updated = { ...prev };
+      for (const fieldName of pendingCleanupFields) {
+        updated[fieldName] = undefined;
+      }
+      return updated;
+    });
+    clearCleanupQueue();
+    setPendingCleanupFields([]);
+  }, [pendingCleanupFields, clearCleanupQueue]);
+
+  // Cross-field validation hook (Spec 007)
+  const {
+    isValid: isCrossFieldValid,
+    isValidating,
+    getFieldErrors: getCrossFieldErrors,
+    validateNow,
+  } = useCrossFieldValidation({
+    schema: effectiveSchema,
+    data,
+    debounceMs: 300,
+  });
+
+  // Combine local errors with cross-field validation errors
+  const getFieldError = useCallback(
+    (fieldName: string): string => {
+      // Local errors take precedence
+      if (errors[fieldName]) {
+        return errors[fieldName];
+      }
+      // Then cross-field validation errors
+      const crossFieldErrors = getCrossFieldErrors(fieldName);
+      return crossFieldErrors.length > 0 ? crossFieldErrors[0] : '';
+    },
+    [errors, getCrossFieldErrors]
+  );
+
+  // Check if form can be submitted
+  const canSubmit = useMemo(() => {
+    return isCrossFieldValid && !isValidating && !loading;
+  }, [isCrossFieldValid, isValidating, loading]);
 
   // Auto-save hook (only for existing content)
   const autoSave = useAutoSave({
@@ -136,6 +237,14 @@ export function DynamicForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate before submitting (Spec 007)
+    const validationResult = validateNow();
+    if (!validationResult.isValid) {
+      setSaveError('Please fix the validation errors before saving');
+      return;
+    }
+
     setLoading(true);
     setSaveError('');
 
@@ -223,7 +332,7 @@ export function DynamicForm({
             options={field.options}
             value={value as string}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
           />
         );
 
@@ -235,7 +344,7 @@ export function DynamicForm({
             options={field.options}
             value={value as string}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
           />
         );
 
@@ -247,7 +356,7 @@ export function DynamicForm({
             options={field.options}
             value={value as number}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
           />
         );
 
@@ -259,7 +368,7 @@ export function DynamicForm({
             options={field.options}
             value={value as boolean}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
           />
         );
 
@@ -271,7 +380,7 @@ export function DynamicForm({
             options={field.options}
             value={value as string}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
           />
         );
 
@@ -283,7 +392,7 @@ export function DynamicForm({
             options={field.options}
             value={value as string}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
             includeTime
           />
         );
@@ -296,7 +405,7 @@ export function DynamicForm({
             options={field.options}
             value={value as string}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
             sourceValue={
               (field.options as SlugFieldOptions).from
                 ? (data[(field.options as SlugFieldOptions).from!] as string)
@@ -313,7 +422,8 @@ export function DynamicForm({
             options={field.options}
             value={value as string}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
+            documentData={data}
           />
         );
 
@@ -327,7 +437,7 @@ export function DynamicForm({
             options={field.options as PortableTextFieldOptions}
             value={portableTextValue}
             onChange={(v) => updateField(name, v)}
-            error={errors[name]}
+            error={getFieldError(name)}
           />
         );
       }
@@ -389,6 +499,16 @@ export function DynamicForm({
         onClose={() => setShowRecovery(false)}
       />
 
+      {/* Hidden Field Cleanup Dialog (Spec 007) */}
+      <HiddenFieldCleanupDialog
+        isOpen={showCleanupDialog}
+        fieldNames={pendingCleanupFields}
+        fieldLabels={fieldLabels}
+        onKeep={handleKeepHiddenValues}
+        onClear={handleClearHiddenValues}
+        onClose={() => setShowCleanupDialog(false)}
+      />
+
       {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
         <div
@@ -433,10 +553,40 @@ export function DynamicForm({
           </div>
         )}
 
-      {/* Schema Fields */}
-      {Object.entries(schema).map(([name, field]) => (
-        <div key={name}>{renderField(name, field)}</div>
-      ))}
+      {/* Schema Fields with groups, conditional visibility, and validation (Spec 007) */}
+      {effectiveSchema.groups && effectiveSchema.groups.length > 0 ? (
+        <FieldGroupsRenderer
+          schema={effectiveSchema}
+          renderField={(name) => {
+            const field = schema[name];
+            if (!field) return null;
+            return (
+              <ConditionalFieldWrapper
+                key={name}
+                fieldName={name}
+                isHidden={isFieldHidden(name)}
+              >
+                {renderField(name, field)}
+              </ConditionalFieldWrapper>
+            );
+          }}
+          fieldErrors={Object.fromEntries(
+            Object.keys(schema).map((name) => [name, Boolean(getFieldError(name))])
+          )}
+          persistenceKey={`${contentTypeName}-groups`}
+        />
+      ) : (
+        // No groups - render fields directly with visibility
+        Object.entries(schema).map(([name, field]) => (
+          <ConditionalFieldWrapper
+            key={name}
+            fieldName={name}
+            isHidden={isFieldHidden(name)}
+          >
+            {renderField(name, field)}
+          </ConditionalFieldWrapper>
+        ))
+      )}
 
       {/* Slug Field */}
       <div>
@@ -495,8 +645,21 @@ export function DynamicForm({
               Delete
             </button>
           )}
+          {/* Validation indicator (Spec 007) */}
+          {isValidating && (
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <span className="animate-spin h-3 w-3 border-2 border-gray-300 border-t-blue-600 rounded-full" />
+              Validating...
+            </span>
+          )}
+          {!isValidating && !isCrossFieldValid && (
+            <span className="text-xs text-red-500 flex items-center gap-1">
+              <span className="h-2 w-2 bg-red-500 rounded-full" />
+              Validation errors
+            </span>
+          )}
           {/* Auto-save indicator */}
-          {contentId && (
+          {contentId && !isValidating && isCrossFieldValid && (
             <span className="text-xs text-gray-500 flex items-center gap-1">
               {autoSave.isSaving && (
                 <>
@@ -530,7 +693,7 @@ export function DynamicForm({
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={!canSubmit}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {loading ? 'Saving...' : contentId ? 'Update' : 'Create'}
