@@ -26,6 +26,19 @@ export type {
   FieldDefinition,
   SchemaDefinition,
   ContentTypeRecord,
+  // Advanced Schema Features (Spec 007)
+  DocumentContext,
+  VisibilityCondition,
+  ValidationContext,
+  ValidationFunction,
+  ComputedFunction,
+  WarningFunction,
+  ValidationError,
+  SchemaValidationFunction,
+  FieldGroup,
+  LayoutMode,
+  DynamicOptionsFunction,
+  SelectDependency,
 } from './types';
 
 export { FIELD_TYPES } from './types';
@@ -79,3 +92,65 @@ export {
   deleteOrphanedTypes,
 } from './sync';
 export type { SyncResult } from './sync';
+
+// Advanced Schema Features - Visibility (Spec 007)
+export {
+  evaluateFieldVisibility,
+  evaluateAllFieldVisibility,
+  getVisibilityDependencies,
+  buildVisibilityDependencyGraph,
+  detectCircularDependencies,
+  getFieldsToReevaluate,
+} from './visibility';
+export type {
+  FieldVisibilityResult,
+  VisibilityEvaluationResult,
+  CircularDependencyCheck,
+} from './visibility';
+
+// Advanced Schema Features - Cross-field Validation (Spec 007)
+export {
+  validateField,
+  validateCrossFields,
+  validateDocument,
+  createDebouncedValidator,
+  getValidationErrorsByField,
+  isDocumentValid,
+  getFieldsWithErrors,
+} from './cross-validation';
+export type {
+  CrossValidationResult,
+  DebouncedValidatorConfig,
+} from './cross-validation';
+
+// Advanced Schema Features - Computed Fields (Spec 007)
+export {
+  isComputedField,
+  getComputedFields,
+  getComputedDependencies,
+  buildComputedDependencyGraph,
+  detectComputedCircularDependencies,
+  getComputationOrder,
+  calculateComputedField,
+  calculateComputedFields,
+  getFieldsToRecalculate,
+} from './computed';
+export type {
+  ComputedFieldsResult,
+  ComputedFieldDependency,
+  ComputedCircularCheck,
+} from './computed';
+
+// Advanced Schema Features - Field Groups (Spec 007)
+export {
+  groupFieldsByGroup,
+  getFieldGroup,
+  getFieldsInGroup,
+  groupHasErrors,
+  getGroupsWithErrors,
+} from './groups';
+export type {
+  FieldWithName,
+  GroupedFields,
+  GroupFieldsResult,
+} from './groups';

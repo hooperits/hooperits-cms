@@ -6,7 +6,13 @@
 import { db } from '../db';
 import { getCache } from '../cache';
 import { NotFoundError, ValidationError } from '../errors';
-import { getSchema, validateContent } from '../schema';
+import {
+  getSchema,
+  validateContent,
+  validateDocument,
+  calculateComputedFields,
+  getComputedFields,
+} from '../schema';
 import type { DocumentStatus, Prisma } from '@prisma/client';
 import { createVersionOnUpdate } from './version';
 import { emitDocumentEvent } from '../realtime/emitter';
@@ -224,8 +230,10 @@ export async function createContent(
   }
 
   // Validate data against schema
+  let dataToSave = { ...input.data };
   const schema = getSchema(typeName);
   if (schema) {
+    // Field-level validation (Zod)
     const validation = validateContent(schema, input.data);
     if (!validation.success) {
       throw new ValidationError(
@@ -235,12 +243,28 @@ export async function createContent(
         }))
       );
     }
+
+    // Cross-field validation (Spec 007)
+    const crossValidation = validateDocument(schema, input.data);
+    if (!crossValidation.isValid) {
+      throw new ValidationError(crossValidation.errors);
+    }
+
+    // Calculate computed fields before persisting (Spec 007)
+    const computedFields = getComputedFields(schema);
+    if (computedFields.length > 0) {
+      const computedResult = calculateComputedFields(schema, input.data);
+      // Merge computed values into data
+      for (const [fieldName, value] of computedResult.computedValues) {
+        dataToSave[fieldName] = value;
+      }
+    }
   }
 
   const content = await db.content.create({
     data: {
       typeId: contentType.id,
-      data: input.data as Prisma.InputJsonValue,
+      data: dataToSave as Prisma.InputJsonValue,
       status: input.status ?? 'DRAFT',
       slug: input.slug ?? null,
       createdById: userId,
@@ -282,10 +306,13 @@ export async function updateContent(
   }
 
   // Validate data if provided
+  let dataToSave = input.data;
   if (input.data) {
     const schema = getSchema(existing.type.name);
     if (schema) {
       const mergedData = { ...(existing.data as object), ...input.data };
+
+      // Field-level validation (Zod)
       const validation = validateContent(schema, mergedData);
       if (!validation.success) {
         throw new ValidationError(
@@ -294,6 +321,23 @@ export async function updateContent(
             message: e.message,
           }))
         );
+      }
+
+      // Cross-field validation (Spec 007)
+      const crossValidation = validateDocument(schema, mergedData);
+      if (!crossValidation.isValid) {
+        throw new ValidationError(crossValidation.errors);
+      }
+
+      // Calculate computed fields before persisting (Spec 007)
+      const computedFields = getComputedFields(schema);
+      if (computedFields.length > 0) {
+        const computedResult = calculateComputedFields(schema, mergedData);
+        // Merge computed values into data
+        dataToSave = { ...mergedData };
+        for (const [fieldName, value] of computedResult.computedValues) {
+          dataToSave[fieldName] = value;
+        }
       }
     }
   }
@@ -319,7 +363,7 @@ export async function updateContent(
   const content = await db.content.update({
     where: { id },
     data: {
-      ...(input.data && { data: input.data as Prisma.InputJsonValue }),
+      ...(dataToSave && { data: dataToSave as Prisma.InputJsonValue }),
       ...(statusUpdate && { status: statusUpdate }),
       ...(input.slug !== undefined && { slug: input.slug }),
       updatedById: userId,

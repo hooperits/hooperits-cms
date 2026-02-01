@@ -177,7 +177,7 @@ Available functions: `count()`, `length()`, `lower()`, `upper()`, `defined()`, `
 
 | Spec | Name | Description | Status |
 |------|------|-------------|--------|
-| 007 | Advanced Schema Features | Conditional fields, cross-validation, groups/tabs | 🔲 Planned |
+| 007 | Advanced Schema Features | Conditional fields, cross-validation, groups/tabs | ✅ Implemented |
 | 008 | Advanced Media Library | Folders, tags, search, image editing, focal point | 🔲 Planned |
 | 009 | Collaboration Features | Comments, tasks, mentions, activity feeds | 🔲 Planned |
 | 010 | Real-time Collaboration | Simultaneous editing with presence & conflict resolution | 🔲 Planned |
@@ -441,7 +441,7 @@ Funciones disponibles: `count()`, `length()`, `lower()`, `upper()`, `defined()`,
 
 | Spec | Nombre | Descripción | Estado |
 |------|--------|-------------|--------|
-| 007 | Advanced Schema Features | Campos condicionales, validación cruzada, grupos/tabs | 🔲 Planificado |
+| 007 | Advanced Schema Features | Campos condicionales, validación cruzada, grupos/tabs | ✅ Implementado |
 | 008 | Advanced Media Library | Carpetas, tags, búsqueda, edición de imágenes, focal point | 🔲 Planificado |
 | 009 | Collaboration Features | Comentarios, tareas, menciones, activity feeds | 🔲 Planificado |
 | 010 | Real-time Collaboration | Edición simultánea con presencia y resolución de conflictos | 🔲 Planificado |
